@@ -22,7 +22,8 @@ else
 ifneq ($(TARGET_LIBINIT_DEFINES_FILE),)
   LOCAL_SRC_FILES += ../../../../$(TARGET_LIBINIT_DEFINES_FILE)
 else
-  LOCAL_SRC_FILES += init_$(TARGET_BOARD_PLATFORM).cpp
+ LOCAL_SRC_FILES += init_$(TARGET_BOARD_PLATFORM).cpp
+endif
 endif
 LOCAL_MODULE := libinit_msm
 include $(BUILD_STATIC_LIBRARY)
