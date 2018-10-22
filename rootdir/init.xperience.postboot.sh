@@ -1,4 +1,5 @@
 #! /vendor/bin/sh
+
 # Copyright  2018 The XPerience Project
 #
 # Redistribution and use in source and binary forms, with or without
@@ -30,21 +31,23 @@
 # Also added msm8917 for future reference
 # This file will be edited to make a better configuration.
 
-#first track board platform
-board=`getprop ro.board.platform`
-device=`getprop ro.xpe.model`
-
 #MSM8953 can be used for SDM450 platforms
 function 8953_sched_eas_config()
 {
     #governor settings
     echo 1 > /sys/devices/system/cpu/cpu0/online
     echo "schedalessa" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-    echo 0 > /sys/devices/system/cpu/cpufreq/schedutil/rate_limit_us
+    echo 0 > /sys/devices/system/cpu/cpufreq/schedalessa/up_rate_limit_us
+    echo 0 > /sys/devices/system/cpu/cpufreq/schedalessa/down_rate_limit_us
+	#configure schedutil too maybe some people wants it :P
+    echo 0 > /sys/devices/system/cpu/cpufreq/schedutil/up_rate_limit_us
+    echo 0 > /sys/devices/system/cpu/cpufreq/schedutil/down_rate_limit_us
     #set the hispeed_freq
-    echo 1401600 > /sys/devices/system/cpu/cpufreq/schedutil/hispeed_freq
+    #echo 1401600 > /sys/devices/system/cpu/cpufreq/schedalessa/hispeed_freq
     #default value for hispeed_load is 90, for 8953 and sdm450 it should be 85
-    echo 85 > /sys/devices/system/cpu/cpufreq/schedutil/hispeed_load
+	# Our sched gov is not the same as 4.9 kernel
+    #echo 85 > /sys/devices/system/cpu/cpufreq/schedalessa/hispeed_load
+
 }
 
 function 8917_sched_eas_config()
@@ -52,11 +55,12 @@ function 8917_sched_eas_config()
     #governor settings
     echo 1 > /sys/devices/system/cpu/cpu0/online
     echo "schedutil" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-    echo 0 > /sys/devices/system/cpu/cpufreq/schedutil/rate_limit_us
+    echo 0 > /sys/devices/system/cpu/cpufreq/schedalessa/up_rate_limit_us
+    echo 0 > /sys/devices/system/cpu/cpufreq/schedalessa/down_rate_limit_us
     #set the hispeed_freq
-    echo 1094400 > /sys/devices/system/cpu/cpufreq/schedutil/hispeed_freq
+    #echo 1094400 > /sys/devices/system/cpu/cpufreq/schedutil/hispeed_freq
     #default value for hispeed_load is 90, for 8917 it should be 85
-    echo 85 > /sys/devices/system/cpu/cpufreq/schedutil/hispeed_load
+    #echo 85 > /sys/devices/system/cpu/cpufreq/schedutil/hispeed_load
 }
 
 
@@ -65,21 +69,76 @@ function 8937_sched_eas_config()
     # enable governor for perf cluster
     echo 1 > /sys/devices/system/cpu/cpu0/online
     echo "schedalessa" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-    echo 0 > /sys/devices/system/cpu/cpu0/cpufreq/schedutil/rate_limit_us
+    echo 0 > /sys/devices/system/cpu/cpu0/cpufreq/schedalessa/up_rate_limit_us
+    echo 0 > /sys/devices/system/cpu/cpu0/cpufreq/schedalessa/down_rate_limit_us
+	#configure schedutil too maybe some people wants it :P
+    echo 0 > /sys/devices/system/cpu/cpu0/cpufreq/schedutil/up_rate_limit_us
+    echo 0 > /sys/devices/system/cpu/cpu0/cpufreq/schedutil/down_rate_limit_us
     #set the hispeed_freq
-    echo 1094400 > /sys/devices/system/cpu/cpu0/cpufreq/schedutil/hispeed_freq
+    echo 1094400 > /sys/devices/system/cpu/cpu0/cpufreq/schedalessa/hispeed_freq
     #default value for hispeed_load is 90, for 8937 it should be 85
-    echo 85 > /sys/devices/system/cpu/cpu0/cpufreq/schedutil/hispeed_load
+    echo 85 > /sys/devices/system/cpu/cpu0/cpufreq/schedalessa/hispeed_load
     ## enable governor for power cluster
     echo 1 > /sys/devices/system/cpu/cpu4/online
     echo "schedutil" > /sys/devices/system/cpu/cpu4/cpufreq/scaling_governor
-    echo 0 > /sys/devices/system/cpu/cpu4/cpufreq/schedutil/rate_limit_us
+    echo 0 > /sys/devices/system/cpu/cpu4/cpufreq/schedalessa/up_rate_limit_us
+    echo 0 > /sys/devices/system/cpu/cpu4/cpufreq/schedalessa/down_rate_limit_us
+	#configure schedutil too maybe some people wants it :P
+    echo 0 > /sys/devices/system/cpu/cpu0/cpufreq/schedutil/up_rate_limit_us
+    echo 0 > /sys/devices/system/cpu/cpu0/cpufreq/schedutil/down_rate_limit_us
     #set the hispeed_freq
-    echo 768000 > /sys/devices/system/cpu/cpu4/cpufreq/schedutil/hispeed_freq
+    #echo 768000 > /sys/devices/system/cpu/cpu4/cpufreq/schedutil/hispeed_freq
     #default value for hispeed_load is 90, for 8937 it should be 85
-    echo 85 > /sys/devices/system/cpu/cpu4/cpufreq/schedutil/hispeed_load
+    #echo 85 > /sys/devices/system/cpu/cpu4/cpufreq/schedutil/hispeed_load
 
 }
+
+function msm8226_config()
+{
+        echo 4 > /sys/module/lpm_levels/enable_low_power/l2
+        echo 1 > /sys/module/msm_pm/modes/cpu0/power_collapse/suspend_enabled
+        echo 1 > /sys/module/msm_pm/modes/cpu1/power_collapse/suspend_enabled
+        echo 1 > /sys/module/msm_pm/modes/cpu2/power_collapse/suspend_enabled
+        echo 1 > /sys/module/msm_pm/modes/cpu3/power_collapse/suspend_enabled
+        echo 1 > /sys/module/msm_pm/modes/cpu0/standalone_power_collapse/suspend_enabled
+        echo 1 > /sys/module/msm_pm/modes/cpu1/standalone_power_collapse/suspend_enabled
+        echo 1 > /sys/module/msm_pm/modes/cpu2/standalone_power_collapse/suspend_enabled
+        echo 1 > /sys/module/msm_pm/modes/cpu3/standalone_power_collapse/suspend_enabled
+        echo 1 > /sys/module/msm_pm/modes/cpu0/standalone_power_collapse/idle_enabled
+        echo 1 > /sys/module/msm_pm/modes/cpu1/standalone_power_collapse/idle_enabled
+        echo 1 > /sys/module/msm_pm/modes/cpu2/standalone_power_collapse/idle_enabled
+        echo 1 > /sys/module/msm_pm/modes/cpu3/standalone_power_collapse/idle_enabled
+        echo 1 > /sys/module/msm_pm/modes/cpu0/power_collapse/idle_enabled
+        echo 1 > /sys/module/msm_pm/modes/cpu1/power_collapse/idle_enabled
+        echo 1 > /sys/module/msm_pm/modes/cpu2/power_collapse/idle_enabled
+        echo 1 > /sys/module/msm_pm/modes/cpu3/power_collapse/idle_enabled
+        echo 1 > /sys/devices/system/cpu/cpu1/online
+        echo 1 > /sys/devices/system/cpu/cpu2/online
+        echo 1 > /sys/devices/system/cpu/cpu3/online
+        echo "ondemand" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+        echo 50000 > /sys/devices/system/cpu/cpufreq/ondemand/sampling_rate
+        echo 90 > /sys/devices/system/cpu/cpufreq/ondemand/up_threshold
+        echo 1 > /sys/devices/system/cpu/cpufreq/ondemand/io_is_busy
+        echo 2 > /sys/devices/system/cpu/cpufreq/ondemand/sampling_down_factor
+        echo 10 > /sys/devices/system/cpu/cpufreq/ondemand/down_differential
+        echo 70 > /sys/devices/system/cpu/cpufreq/ondemand/up_threshold_multi_core
+        echo 10 > /sys/devices/system/cpu/cpufreq/ondemand/down_differential_multi_core
+        echo 787200 > /sys/devices/system/cpu/cpufreq/ondemand/optimal_freq
+        echo 300000 > /sys/devices/system/cpu/cpufreq/ondemand/sync_freq
+        echo 80 > /sys/devices/system/cpu/cpufreq/ondemand/up_threshold_any_cpu_load
+        echo 300000 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+        chown -h system /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
+        chown -h system /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+        chown -h root.system /sys/devices/system/cpu/cpu1/online
+        chown -h root.system /sys/devices/system/cpu/cpu2/online
+        chown -h root.system /sys/devices/system/cpu/cpu3/online
+        chmod -h 664 /sys/devices/system/cpu/cpu1/online
+        chmod -h 664 /sys/devices/system/cpu/cpu2/online
+        chmod -h 664 /sys/devices/system/cpu/cpu3/online
+}
+
+target=`getprop ro.board.platform`
+device=`getprop ro.xpe.model`
 
 function configure_zram_parameters() {
     MemTotalStr=`cat /proc/meminfo | grep MemTotal`
@@ -129,30 +188,46 @@ function enable_memory_features()
     fi
 }
 
+case "$target" in
+    "msm8226")
+	msm8226_config
+	configure_zram_parameters
+	enable_memory_features
+	setprop vendor.xperience.post_boot.parsed 8226
+	;;
+esac
 
-if [ $board == "msm8917" ]; then
-              #execute his EAS configuration
-              msm8917_sched_eas_config
-              #configure memory features
-              enable_memory_features
-              #to know if this was executed
-              setprop vendor.xperience.post_boot.parsed 1
-fi
-if [ $board == "msm8937" ]; then
-              #execute his EAS configuration
-              msm8937_sched_eas_config
-              #configure memory features
-              enable_memory_features
-              #to know if this was executed
-              setprop vendor.xperience.post_boot.parsed 1
-fi
-if [ $board == "msm8953" ]; then
-              #execute his EAS configuration
-              msm8953_sched_eas_config
-      if [ $device == "mido" ]; then
-        #configure memory features
-        enable_memory_features
-      fi
-      #to know if this was executed
-      setprop vendor.xperience.post_boot.parsed 1
-fi
+case "$target" in
+     "msm8917")
+     #execute his EAS configuration
+     8917_sched_eas_config
+     #configure memory features
+     enable_memory_features
+     configure_zram_parameters
+     #to know if this was executed
+     setprop vendor.xperience.post_boot.parsed 8917
+     ;;
+esac
+
+case "$target" in
+     "msm8937")
+     #execute his EAS configuration
+     8937_sched_eas_config
+     #configure memory features
+     enable_memory_features
+     configure_zram_parameters
+     #to know if this was executed
+     setprop vendor.xperience.post_boot.parsed 8937
+     ;;
+esac
+case "$target" in
+     "msm8953")
+     #execute his EAS configuration
+     8953_sched_eas_config
+     #configure memory features
+     enable_memory_features
+     configure_zram_parameters
+     #to know if this was executed
+     setprop vendor.xperience.post_boot.parsed 8953
+     ;;
+esac
