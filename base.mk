@@ -59,7 +59,6 @@ endif
 #skip boot jars check
 SKIP_BOOT_JARS_CHECK := true
 
-
 #Enable suspend during charger mode
 BOARD_CHARGER_ENABLE_SUSPEND := true
 
@@ -857,14 +856,11 @@ PRODUCT_PACKAGES := \
     CertInstaller \
     DrmProvider \
     Email \
-    Gallery2 \
     LatinIME \
-    Music \
     netutils-wrapper-1.0 \
     Phone \
     Provision \
     Protips \
-    QuickSearchBox \
     Settings \
     Sync \
     SystemUI \
@@ -909,7 +905,7 @@ PRODUCT_PACKAGES += $(BSON)
 PRODUCT_PACKAGES += $(C2DCC)
 PRODUCT_PACKAGES += $(CHROMIUM)
 PRODUCT_PACKAGES += $(CIMAX)
-PRODUCT_PACKAGES += $(CM)
+#PRODUCT_PACKAGES += $(CM)
 PRODUCT_PACKAGES += $(DELAUN)
 PRODUCT_PACKAGES += $(RCS)
 PRODUCT_PACKAGES += $(CONNECTIVITY)
@@ -1000,7 +996,7 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES += qcril.db
 
 # MSM updater library
-PRODUCT_PACKAGES += librecovery_updater_msm
+# PRODUCT_PACKAGES += librecovery_updater_msm
 
 # vcard jar
 PRODUCT_PACKAGES += vcard
@@ -1009,7 +1005,7 @@ PRODUCT_PACKAGES += vcard
 PRODUCT_PACKAGES += tcmiface
 
 # healthd libaray expanded for mode charger
-PRODUCT_PACKAGES += libhealthd.msm
+# PRODUCT_PACKAGES += libhealthd.msm
 
 #intialise PRODUCT_PACKAGES_DEBUG list for debug modules
 PRODUCT_PACKAGES_DEBUG := init.qcom.testscripts.sh
@@ -1022,7 +1018,7 @@ PRODUCT_PACKAGES_DEBUG += init.qcom.debug.sh
 
 PRODUCT_PACKAGES_DEBUG += $(TELEPHONY_DBG)
 
-PRODUCT_COPY_FILES := \
+# PRODUCT_COPY_FILES := \
     frameworks/native/data/etc/android.hardware.camera.flash-autofocus.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.camera.flash-autofocus.xml \
     frameworks/native/data/etc/android.hardware.camera.front.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.camera.front.xml \
     frameworks/native/data/etc/android.hardware.camera.full.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.camera.full.xml\
@@ -1147,6 +1143,9 @@ ifeq ($(TARGET_BUILD_VARIANT),user)
 PRODUCT_DEFAULT_PROPERTY_OVERRIDES+= \
     ro.adb.secure=1
 endif
+
+#skip boot jars check
+SKIP_BOOT_JARS_CHECK := true
 
 # OEM Unlock reporting
 PRODUCT_DEFAULT_PROPERTY_OVERRIDES += \
