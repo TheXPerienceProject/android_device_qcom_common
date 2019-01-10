@@ -42,7 +42,7 @@ QCOM_BOARD_PLATFORMS += $(TRINKET)
 QSD8K_BOARD_PLATFORMS := qsd8k
 
 TARGET_USE_VENDOR_CAMERA_EXT := true
-TARGET_USE_QTI_BT_STACK := true
+#TARGET_USE_QTI_BT_STACK := true
 BOARD_HAVE_QCOM_FM := true
 
 #Enable suspend during charger mode
@@ -199,9 +199,9 @@ BT += libbt-logClient
 BT += bt_logger
 ifeq ($(TARGET_USE_QTI_BT_STACK), true)
 BT += libbluetooth_qti
-endif
 BT += libbt-hidlclient
-BOARD_BLUETOOTH_BDROID_BUILDCFG_INCLUDE_DIR := device/qcom/common
+endif
+#BOARD_BLUETOOTH_BDROID_BUILDCFG_INCLUDE_DIR := device/qcom/common
 
 #C2DColorConvert
 C2DCC := libc2dcolorconvert
@@ -809,7 +809,7 @@ RCS += rcs_service_api
 RCS += rcs_service_api.xml
 
 #IMS SETTINGS
-IMS_SETTINGS := imssettings
+#IMS_SETTINGS := imssettings
 
 #IMS Extension module for Android Telephony
 IMS_EXT := ims-ext-common
@@ -857,14 +857,11 @@ PRODUCT_PACKAGES := \
     CertInstaller \
     DrmProvider \
     Email \
-    Gallery2 \
     LatinIME \
-    Music \
     netutils-wrapper-1.0 \
     Phone \
     Provision \
     Protips \
-    QuickSearchBox \
     Settings \
     Sync \
     SystemUI \
@@ -916,7 +913,7 @@ PRODUCT_PACKAGES += $(BT)
 PRODUCT_PACKAGES += $(C2DCC)
 PRODUCT_PACKAGES += $(CHROMIUM)
 PRODUCT_PACKAGES += $(CIMAX)
-PRODUCT_PACKAGES += $(CM)
+#PRODUCT_PACKAGES += $(CM)
 PRODUCT_PACKAGES += $(DELAUN)
 PRODUCT_PACKAGES += $(RCS)
 PRODUCT_PACKAGES += $(CONNECTIVITY)
@@ -968,12 +965,12 @@ ifeq ($(strip $(TARGET_USES_NQ_NFC)),true)
 PRODUCT_PACKAGES += $(NQ_NFC)
 PRODUCT_BOOT_JARS += com.nxp.nfc.nq
 endif
-ifeq ($(strip $(BOARD_HAVE_QCOM_FM)),true)
-PRODUCT_BOOT_JARS += qcom.fmradio
+#ifeq ($(strip $(BOARD_HAVE_QCOM_FM)),true)
+#PRODUCT_BOOT_JARS += qcom.fmradio
 # system prop for fm
-PRODUCT_PROPERTY_OVERRIDES += \
-    vendor.hw.fm.init=0
-endif #BOARD_HAVE_QCOM_FM
+#PRODUCT_PROPERTY_OVERRIDES += \
+#    vendor.hw.fm.init=0
+#endif #BOARD_HAVE_QCOM_FM
 PRODUCT_PACKAGES += $(OPENCORE)
 PRODUCT_PACKAGES += $(PPP)
 PRODUCT_PACKAGES += $(PROTOBUF)
@@ -1022,7 +1019,7 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES += qcril.db
 
 # MSM updater library
-PRODUCT_PACKAGES += librecovery_updater_msm
+# PRODUCT_PACKAGES += librecovery_updater_msm
 
 # vcard jar
 PRODUCT_PACKAGES += vcard
@@ -1031,7 +1028,7 @@ PRODUCT_PACKAGES += vcard
 PRODUCT_PACKAGES += tcmiface
 
 # healthd libaray expanded for mode charger
-PRODUCT_PACKAGES += libhealthd.msm
+# PRODUCT_PACKAGES += libhealthd.msm
 
 #intialise PRODUCT_PACKAGES_DEBUG list for debug modules
 PRODUCT_PACKAGES_DEBUG := init.qcom.testscripts.sh
@@ -1042,7 +1039,7 @@ PRODUCT_PACKAGES_DEBUG += init.qcom.debug.sh
 
 #NANOPB_LIBRARY_NAME := libnanopb-c-2.8.0
 
-PRODUCT_COPY_FILES := \
+# PRODUCT_COPY_FILES := \
     frameworks/native/data/etc/android.hardware.camera.flash-autofocus.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.camera.flash-autofocus.xml \
     frameworks/native/data/etc/android.hardware.camera.front.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.camera.front.xml \
     frameworks/native/data/etc/android.hardware.camera.full.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.camera.full.xml\
@@ -1179,10 +1176,10 @@ endif
 #skip boot jars check
 SKIP_BOOT_JARS_CHECK := true
 
-ifeq ($(TARGET_BUILD_VARIANT),user)
-PRODUCT_DEFAULT_PROPERTY_OVERRIDES+= \
-    ro.adb.secure=1
-endif
+#ifeq ($(TARGET_BUILD_VARIANT),user)
+#PRODUCT_DEFAULT_PROPERTY_OVERRIDES+= \
+#    ro.adb.secure=1
+#endif
 
 #Camera QC extends API
 ifeq ($(strip $(TARGET_USES_QTIC_EXTENSION)),true)
@@ -1231,4 +1228,4 @@ endif
 
 PRODUCT_PACKAGES += liboemaids_system
 PRODUCT_PACKAGES += liboemaids_vendor
-PRODUCT_PACKAGES += android.hardware.health@2.0-service
+#PRODUCT_PACKAGES += android.hardware.health@2.0-service
