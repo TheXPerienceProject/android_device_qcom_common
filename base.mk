@@ -877,7 +877,7 @@ PRODUCT_PACKAGES := \
     QtiDialer
 
 ifeq ($(TARGET_HAS_LOW_RAM),true)
-    DELAUN := Launcher3Go
+    DELAUN := NightfallQuickStepGo
 else
     # Live Wallpapers
     PRODUCT_PACKAGES += \
@@ -885,7 +885,7 @@ else
             LiveWallpapersPicker \
             VisualizationWallpapers
 
-    DELAUN := Launcher3
+    DELAUN := NightfallQuickStep
 endif
 
 PRODUCT_PACKAGES += $(ALSA_HARDWARE)
