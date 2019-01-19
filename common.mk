@@ -56,7 +56,6 @@ PRODUCT_COPY_FILES += $(QCPATH)/commonsys-intf/telephony/build/telephony_product
 # Permission for Wi-Fi passpoint support
 PRODUCT_COPY_FILES += frameworks/native/data/etc/android.hardware.wifi.passpoint.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.wifi.passpoint.xml
 
-PRODUCT_PRIVATE_KEY := device/qcom/common/qcom.key
 PRODUCT_PACKAGES += qcril.db
 
 ifneq ($(TARGET_DEFINES_DALVIK_HEAP), true)
