@@ -875,8 +875,7 @@ PRODUCT_PACKAGES := \
     SnapdragonGallery \
     SnapdragonMusic \
     VideoEditor \
-    SnapdragonLauncher \
-    QtiDialer
+    SnapdragonLauncher
 
 ifeq ($(TARGET_HAS_LOW_RAM),true)
     DELAUN := NightfallQuickStepGo
