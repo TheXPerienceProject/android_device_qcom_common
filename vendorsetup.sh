@@ -66,6 +66,7 @@ add_lunch_combo sm6150-userdebug
 add_lunch_combo sm6150_au-userdebug
 add_lunch_combo trinket-userdebug
 
+
 # SDClang Environment Variables
 export SDCLANG_AE_CONFIG=device/qcom/common/sdclang/sdclangAE.json
 export SDCLANG_CONFIG=device/qcom/common/sdclang/sdclang.json
