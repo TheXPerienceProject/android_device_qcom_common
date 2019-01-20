@@ -882,8 +882,7 @@ PRODUCT_PACKAGES := \
     SnapdragonLauncher \
     a4wpservice \
     wipowerservice \
-    Mms \
-    QtiDialer
+    Mms
 
 
 ifeq ($(TARGET_HAS_LOW_RAM),true)
