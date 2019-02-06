@@ -46,6 +46,10 @@ PRODUCT_COPY_FILES += \
 
 PRODUCT_PACKAGES += qcril.db
 
+# XPerience postboot based on qcom file
+PRODUCT_PACKAGES +=
+    init.xperience.postboot.sh
+
 ifneq ($(TARGET_DEFINES_DALVIK_HEAP), true)
 ifneq ($(TARGET_HAS_LOW_RAM), true)
 $(call inherit-product, frameworks/native/build/phone-xhdpi-1024-dalvik-heap.mk)
