@@ -65,7 +65,7 @@ PRODUCT_COPY_FILES += frameworks/native/data/etc/android.hardware.wifi.passpoint
 PRODUCT_PACKAGES += qcril.db
 
 # XPerience postboot based on qcom file
-PRODUCT_PACKAGES +=
+PRODUCT_PACKAGES += \
     init.xperience.postboot.sh
 
 ifneq ($(TARGET_DEFINES_DALVIK_HEAP), true)
