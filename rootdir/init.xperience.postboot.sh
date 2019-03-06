@@ -34,24 +34,58 @@
 #MSM8953 can be used for SDM450 platforms
 function 8953_sched_eas_config()
 {
+#detect if we have SchedAlessa if not use SchedUtil configuration
+if [ "$gov" = "schedalessa" ];then
     #governor settings schedalessa
     echo 1 > /sys/devices/system/cpu/cpu0/online
     echo "schedalessa" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
     echo 0 > /sys/devices/system/cpu/cpufreq/schedalessa/up_rate_limit_us
     echo 0 > /sys/devices/system/cpu/cpufreq/schedalessa/down_rate_limit_us
-	#configure schedutil too maybe some people wants it :P
-    echo 0 > /sys/devices/system/cpu/cpufreq/schedutil/up_rate_limit_us
-    echo 0 > /sys/devices/system/cpu/cpufreq/schedutil/down_rate_limit_us
-
+    #BigCluster
+    echo 1 > /sys/devices/system/cpu/cpu4/online
+    echo "schedutil" > /sys/devices/system/cpu/cpu4/cpufreq/scaling_governor
+    echo 0 > /sys/devices/system/cpu/cpu4/cpufreq/schedutil/rate_limit_us
+    echo 1363200 > /sys/devices/system/cpu/cpu4/cpufreq/schedutil/hispeed_freq
+else
     #governor settings schedutil
     echo 1 > /sys/devices/system/cpu/cpu0/online
     echo "schedutil" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
     echo 0 > /sys/devices/system/cpu/cpufreq/schedutil/rate_limit_us
+    echo 0 > /sys/devices/system/cpu/cpufreq/schedutil/up_rate_limit_us
+    echo 0 > /sys/devices/system/cpu/cpufreq/schedutil/down_rate_limit_us
     #set the hispeed_freq
     echo 1401600 > /sys/devices/system/cpu/cpufreq/schedutil/hispeed_freq
     #default value for hispeed_load is 90, for 8953 and sdm450 it should be 85
     echo 85 > /sys/devices/system/cpu/cpufreq/schedutil/hispeed_load
+    echo 1 > /sys/devices/system/cpu/cpu4/online
+    echo "schedutil" > /sys/devices/system/cpu/cpu4/cpufreq/scaling_governor
+    echo 0 > /sys/devices/system/cpu/cpu4/cpufreq/schedutil/rate_limit_us
+    echo 1401600 > /sys/devices/system/cpu/cpu4/cpufreq/schedutil/hispeed_freq
+fi
 
+    #init task load, restrict wakeups to preferred cluster
+    echo 15 > /proc/sys/kernel/sched_init_task_load
+    #force set min freq cuz in some weird cases that is set to 1ghz
+    echo 652800 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+	
+    # Bring up all cores online
+    echo 1 > /sys/devices/system/cpu/cpu1/online
+    echo 1 > /sys/devices/system/cpu/cpu2/online
+    echo 1 > /sys/devices/system/cpu/cpu3/online
+    echo 1 > /sys/devices/system/cpu/cpu4/online
+    echo 1 > /sys/devices/system/cpu/cpu5/online
+    echo 1 > /sys/devices/system/cpu/cpu6/online
+    echo 1 > /sys/devices/system/cpu/cpu7/online
+
+    # Enable low power modes
+    echo 0 > /sys/module/lpm_levels/parameters/sleep_disabled
+
+    # choose idle CPU for top app tasks
+    echo 1 > /dev/stune/top-app/schedtune.prefer_idle
+    echo 1 > /dev/stune/top-app/schedtune.sched_boost
+
+    #Enable Schedtune boost
+    echo 1 > /dev/stune/schedtune.boost
 }
 
 function 8917_sched_eas_config()
