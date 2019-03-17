@@ -67,6 +67,8 @@ fi
     echo 15 > /proc/sys/kernel/sched_init_task_load
     #force set min freq cuz in some weird cases that is set to 1ghz
     echo 652800 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+    # force set max freq due to some random bug where is setting max freq as 1.6ghz
+    echo 2016000 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
 	
     # Bring up all cores online
     echo 1 > /sys/devices/system/cpu/cpu1/online
