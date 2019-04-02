@@ -436,7 +436,7 @@ function enable_memory_features()
 
 # Check panel_name
 panel_model=`cat /sys/class/graphics/fb0/msm_fb_panel_info | grep panel_name`
-default_color=`getprop vendor.display.enable_default_color_mode`
+default_color = `getprop vendor.display.enable_default_color_mode`
 
 function buning_tianma_fix()
 {
