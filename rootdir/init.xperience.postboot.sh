@@ -34,34 +34,65 @@
 #MSM8953 can be used for SDM450 platforms
 function 8953_sched_eas_config()
 {
-#detect if we have SchedAlessa if not use SchedUtil configuration
-if [ "$gov" = "schedalessa" ];then
-    #governor settings schedalessa
-    echo 1 > /sys/devices/system/cpu/cpu0/online
-    echo "schedalessa" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-    echo 0 > /sys/devices/system/cpu/cpufreq/schedalessa/up_rate_limit_us
-    echo 0 > /sys/devices/system/cpu/cpufreq/schedalessa/down_rate_limit_us
-    #BigCluster
-    echo 1 > /sys/devices/system/cpu/cpu4/online
-    echo "schedutil" > /sys/devices/system/cpu/cpu4/cpufreq/scaling_governor
-    echo 0 > /sys/devices/system/cpu/cpu4/cpufreq/schedutil/rate_limit_us
-    echo 1363200 > /sys/devices/system/cpu/cpu4/cpufreq/schedutil/hispeed_freq
+
+   #if the kernel version >=4.9,use the schedutil governor
+   KernelVersionStr=`cat /proc/sys/kernel/osrelease`
+   KernelVersionS=${KernelVersionStr:2:2}
+   KernelVersionA=${KernelVersionStr:0:1}
+   KernelVersionB=${KernelVersionS%.*}
+
+if [ $KernelVersionA -ge 4 ] && [ $KernelVersionB -ge 9 ]; then
+	if [ "$gov" = "schedalessa" ];then
+	    #governor settings
+	    echo 1 > /sys/devices/system/cpu/cpu0/online
+	    echo "schedalessa" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+	    echo 0 > /sys/devices/system/cpu/cpufreq/schedalessa/rate_limit_us
+	    #set the hispeed_freq
+	    echo 1401600 > /sys/devices/system/cpu/cpufreq/schedalessa/hispeed_freq
+	    #default value for hispeed_load is 90, for 8953 and sdm450 it should be 85
+	    echo 85 > /sys/devices/system/cpu/cpufreq/schedalessa/hispeed_load
+	else
+	    #governor settings
+	    echo 1 > /sys/devices/system/cpu/cpu0/online
+	    echo "schedutil" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+	    echo 0 > /sys/devices/system/cpu/cpufreq/schedutil/rate_limit_us
+	    #set the hispeed_freq
+	    echo 1401600 > /sys/devices/system/cpu/cpufreq/schedutil/hispeed_freq
+	    #default value for hispeed_load is 90, for 8953 and sdm450 it should be 85
+	    echo 85 > /sys/devices/system/cpu/cpufreq/schedutil/hispeed_load
+	fi
 else
-    #governor settings schedutil
-    echo 1 > /sys/devices/system/cpu/cpu0/online
-    echo "schedutil" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-    echo 0 > /sys/devices/system/cpu/cpufreq/schedutil/rate_limit_us
-    echo 0 > /sys/devices/system/cpu/cpufreq/schedutil/up_rate_limit_us
-    echo 0 > /sys/devices/system/cpu/cpufreq/schedutil/down_rate_limit_us
-    #set the hispeed_freq
-    echo 1401600 > /sys/devices/system/cpu/cpufreq/schedutil/hispeed_freq
-    #default value for hispeed_load is 90, for 8953 and sdm450 it should be 85
-    echo 85 > /sys/devices/system/cpu/cpufreq/schedutil/hispeed_load
-    echo 1 > /sys/devices/system/cpu/cpu4/online
-    echo "schedutil" > /sys/devices/system/cpu/cpu4/cpufreq/scaling_governor
-    echo 0 > /sys/devices/system/cpu/cpu4/cpufreq/schedutil/rate_limit_us
-    echo 1401600 > /sys/devices/system/cpu/cpu4/cpufreq/schedutil/hispeed_freq
+	#detect if we have SchedAlessa if not use SchedUtil configuration
+	if [ "$gov" = "schedalessa" ];then
+	    #governor settings schedalessa
+	    echo 1 > /sys/devices/system/cpu/cpu0/online
+	    echo "schedalessa" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+	    echo 0 > /sys/devices/system/cpu/cpufreq/schedalessa/up_rate_limit_us
+	    echo 0 > /sys/devices/system/cpu/cpufreq/schedalessa/down_rate_limit_us
+	    #BigCluster
+	    echo 1 > /sys/devices/system/cpu/cpu4/online
+	    echo "schedalessa" > /sys/devices/system/cpu/cpu4/cpufreq/scaling_governor
+	    echo 0 > /sys/devices/system/cpu/cpu4/cpufreq/schedutil/rate_limit_us
+	    echo 1363200 > /sys/devices/system/cpu/cpu4/cpufreq/schedutil/hispeed_freq
+	else
+	    #governor settings schedutil
+	    echo 1 > /sys/devices/system/cpu/cpu0/online
+	    echo "schedutil" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+	    echo 0 > /sys/devices/system/cpu/cpufreq/schedutil/rate_limit_us
+	    echo 0 > /sys/devices/system/cpu/cpufreq/schedutil/up_rate_limit_us
+	    echo 0 > /sys/devices/system/cpu/cpufreq/schedutil/down_rate_limit_us
+	    #set the hispeed_freq
+	    echo 1401600 > /sys/devices/system/cpu/cpufreq/schedutil/hispeed_freq
+	    #default value for hispeed_load is 90, for 8953 and sdm450 it should be 85
+	    echo 85 > /sys/devices/system/cpu/cpufreq/schedutil/hispeed_load
+	    echo 1 > /sys/devices/system/cpu/cpu4/online
+	    echo "schedutil" > /sys/devices/system/cpu/cpu4/cpufreq/scaling_governor
+	    echo 0 > /sys/devices/system/cpu/cpu4/cpufreq/schedutil/rate_limit_us
+	    echo 1401600 > /sys/devices/system/cpu/cpu4/cpufreq/schedutil/hispeed_freq
+	fi
 fi
+
+setprop vendor.xperience.easkernelversion $KernelVersionA.$KernelVersionB
 
     #init task load, restrict wakeups to preferred cluster
     echo 15 > /proc/sys/kernel/sched_init_task_load
@@ -405,14 +436,14 @@ function enable_memory_features()
 
 # Check panel_name
 panel_model=`cat /sys/class/graphics/fb0/msm_fb_panel_info | grep panel_name`
-default_color = `getprop vendor.display.enable_default_color_mode`
+default_color=`getprop vendor.display.enable_default_color_mode`
 
 function buning_tianma_fix()
 {
 # mainly on mido devices
 if [ "$panel_model" == "panel_name=nt35596 tianma fhd video mode dsi panel" ]; then
 
-    if ["$default_color" == "1"]; then
+    if [ "$default_color" == "1" ]; then
 	    setprop vendor.display.enable_default_color_mode 0
 	fi
 
@@ -425,7 +456,7 @@ fi
 # Mainly on vince
 if [ "$panel_model" == "panel_name=td4310 fhdplus e7 video mode dsi panel" ]; then
 
-    if ["$default_color" == "1"]; then
+    if [ "$default_color" == "1" ]; then
 	    setprop vendor.display.enable_default_color_mode 0
 	fi
 
