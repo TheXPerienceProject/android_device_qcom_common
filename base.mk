@@ -755,7 +755,9 @@ THERMAL_HAL += thermal.sdm710
 THERMAL_HAL += thermal.qcs605
 THERMAL_HAL += thermal.sdm660
 THERMAL_HAL += thermal.msm8996
+ifneq ($(DEVICE_PROVIDES_THERMAL),true)
 THERMAL_HAL += thermal.msm8953
+endif
 THERMAL_HAL += thermal.msm8937
 THERMAL_HAL += thermal.msmnile
 THERMAL_HAL += thermal.$(MSMSTEPPE)
