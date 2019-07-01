@@ -377,6 +377,53 @@ function msm8226_config()
         chmod -h 664 /sys/devices/system/cpu/cpu3/online
 }
 
+function sdm660_configuration(){
+            # configure governor settings for little cluster
+            echo 1 > /sys/devices/system/cpu/cpu0/online
+            echo "schedutil" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+            echo 633600 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+
+            # configure governor settings for big cluster
+            echo 1 > /sys/devices/system/cpu/cpu4/online
+            echo "schedalessa" > /sys/devices/system/cpu/cpu4/cpufreq/scaling_governor
+            echo 1113600 > /sys/devices/system/cpu/cpu4/cpufreq/scaling_min_freq
+
+            echo 2 > /sys/devices/system/cpu/cpu4/core_ctl/min_cpus
+            echo 60 > /sys/devices/system/cpu/cpu4/core_ctl/busy_up_thres
+            echo 30 > /sys/devices/system/cpu/cpu4/core_ctl/busy_down_thres
+            echo 100 > /sys/devices/system/cpu/cpu4/core_ctl/offline_delay_ms
+            echo 1 > /sys/devices/system/cpu/cpu4/core_ctl/is_big_cluster
+            echo 4 > /sys/devices/system/cpu/cpu4/core_ctl/task_thres
+
+            # Setting b.L scheduler parameters
+            echo 67 > /proc/sys/kernel/sched_downmigrate
+            echo 77 > /proc/sys/kernel/sched_upmigrate
+            echo 85 > /proc/sys/kernel/sched_group_downmigrate
+            echo 100 > /proc/sys/kernel/sched_group_upmigrate
+
+            #extra configs for SchedAlessa and SchedUtil
+            echo 0 > /sys/devices/system/cpu/cpu0/cpufreq/schedutil/up_rate_limit_us
+            echo 0 > /sys/devices/system/cpu/cpu0/cpufreq/schedutil/down_rate_limit_us
+            echo 0 > /sys/devices/system/cpu/cpu0/cpufreq/schedalessa/up_rate_limit_us
+            echo 0 > /sys/devices/system/cpu/cpu0/cpufreq/schedalessa/down_rate_limit_us
+            echo 0 > /sys/devices/system/cpu/cpu4/cpufreq/schedutil/up_rate_limit_us
+            echo 0 > /sys/devices/system/cpu/cpu4/cpufreq/schedutil/down_rate_limit_us
+            echo 0 > /sys/devices/system/cpu/cpu4/cpufreq/schedalessa/up_rate_limit_us
+            echo 0 > /sys/devices/system/cpu/cpu4/cpufreq/schedalessa/down_rate_limit_us
+
+            echo 1 > /proc/sys/kernel/sched_walt_rotate_big_tasks
+}
+####SDM 660 ###
+
+# copy GPU frequencies to vendor property
+if [ -f /sys/class/kgsl/kgsl-3d0/gpu_available_frequencies ]; then
+    gpu_freq=`cat /sys/class/kgsl/kgsl-3d0/gpu_available_frequencies` 2> /dev/null
+    setprop vendor.gpu.available_frequencies "$gpu_freq"
+fi
+
+########################################################################################
+##########                Finish CPU configuration                       ###############
+########################################################################################
 target=`getprop ro.board.platform`
 device=`getprop ro.xpe.model`
 gov=`cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor`
@@ -530,5 +577,17 @@ case "$target" in
      configure_zram_parameters
      #to know if this was executed
      setprop vendor.xperience.post_boot.parsed 8953
+     ;;
+esac
+
+case "$target" in
+     "sdm660")
+     #execute his EAS configuration
+     sdm660_configuration()
+     #configure memory features
+     enable_memory_features
+     configure_zram_parameters
+     #to know if this was executed
+     setprop vendor.xperience.post_boot.parsed sdm660
      ;;
 esac
