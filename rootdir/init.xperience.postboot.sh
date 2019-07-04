@@ -1,6 +1,6 @@
 #! /vendor/bin/sh
 
-# Copyright  2018 The XPerience Project
+# Copyright  2018-2019 The XPerience Project
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -100,7 +100,7 @@ setprop vendor.xperience.easkernelversion $KernelVersionA.$KernelVersionB
     echo 652800 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
     # force set max freq due to some random bug where is setting max freq as 1.6ghz
     echo 2016000 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
-	
+
     # Bring up all cores online
     echo 1 > /sys/devices/system/cpu/cpu1/online
     echo 1 > /sys/devices/system/cpu/cpu2/online
@@ -378,6 +378,9 @@ function msm8226_config()
 }
 
 function sdm660_configuration(){
+
+  #execute his EAS configuration
+  if [ "$gov" = "schedutil" -o "$gov" = "schedalessa" ];then
             # configure governor settings for little cluster
             echo 1 > /sys/devices/system/cpu/cpu0/online
             echo "schedutil" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
@@ -387,19 +390,6 @@ function sdm660_configuration(){
             echo 1 > /sys/devices/system/cpu/cpu4/online
             echo "schedalessa" > /sys/devices/system/cpu/cpu4/cpufreq/scaling_governor
             echo 1113600 > /sys/devices/system/cpu/cpu4/cpufreq/scaling_min_freq
-
-            echo 2 > /sys/devices/system/cpu/cpu4/core_ctl/min_cpus
-            echo 60 > /sys/devices/system/cpu/cpu4/core_ctl/busy_up_thres
-            echo 30 > /sys/devices/system/cpu/cpu4/core_ctl/busy_down_thres
-            echo 100 > /sys/devices/system/cpu/cpu4/core_ctl/offline_delay_ms
-            echo 1 > /sys/devices/system/cpu/cpu4/core_ctl/is_big_cluster
-            echo 4 > /sys/devices/system/cpu/cpu4/core_ctl/task_thres
-
-            # Setting b.L scheduler parameters
-            echo 67 > /proc/sys/kernel/sched_downmigrate
-            echo 77 > /proc/sys/kernel/sched_upmigrate
-            echo 85 > /proc/sys/kernel/sched_group_downmigrate
-            echo 100 > /proc/sys/kernel/sched_group_upmigrate
 
             #extra configs for SchedAlessa and SchedUtil
             echo 0 > /sys/devices/system/cpu/cpu0/cpufreq/schedutil/up_rate_limit_us
@@ -412,6 +402,87 @@ function sdm660_configuration(){
             echo 0 > /sys/devices/system/cpu/cpu4/cpufreq/schedalessa/down_rate_limit_us
 
             echo 1 > /proc/sys/kernel/sched_walt_rotate_big_tasks
+          else
+            # configure governor settings for little cluster
+            echo 1 > /sys/devices/system/cpu/cpu0/online
+            echo "schedutil" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+            echo 633600 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+
+            # configure governor settings for big cluster
+            echo 1 > /sys/devices/system/cpu/cpu4/online
+            echo "schedutil" > /sys/devices/system/cpu/cpu4/cpufreq/scaling_governor
+            echo 1113600 > /sys/devices/system/cpu/cpu4/cpufreq/scaling_min_freq
+
+            #extra configs for SchedAlessa and SchedUtil
+            echo 0 > /sys/devices/system/cpu/cpu0/cpufreq/schedutil/up_rate_limit_us
+            echo 0 > /sys/devices/system/cpu/cpu0/cpufreq/schedutil/down_rate_limit_us
+            echo 0 > /sys/devices/system/cpu/cpu4/cpufreq/schedutil/up_rate_limit_us
+            echo 0 > /sys/devices/system/cpu/cpu4/cpufreq/schedutil/down_rate_limit_us
+            echo 1 > /proc/sys/kernel/sched_walt_rotate_big_tasks
+
+fi
+
+        if [ "$gov" = "interactive"  ];then
+          # online CPU0
+          echo 1 > /sys/devices/system/cpu/cpu0/online
+          # configure governor settings for little cluster
+          echo "interactive" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+          echo 1 > /sys/devices/system/cpu/cpu0/cpufreq/interactive/use_sched_load
+          echo 1 > /sys/devices/system/cpu/cpu0/cpufreq/interactive/use_migration_notif
+          echo "19000 1401600:39000" > /sys/devices/system/cpu/cpu0/cpufreq/interactive/above_hispeed_delay
+          echo 90 > /sys/devices/system/cpu/cpu0/cpufreq/interactive/go_hispeed_load
+          echo 20000 > /sys/devices/system/cpu/cpu0/cpufreq/interactive/timer_rate
+          echo 1401600 > /sys/devices/system/cpu/cpu0/cpufreq/interactive/hispeed_freq
+          echo 0 > /sys/devices/system/cpu/cpu0/cpufreq/interactive/io_is_busy
+          echo "85 1747200:95" > /sys/devices/system/cpu/cpu0/cpufreq/interactive/target_loads
+          echo 39000 > /sys/devices/system/cpu/cpu0/cpufreq/interactive/min_sample_time
+          echo 0 > /sys/devices/system/cpu/cpu0/cpufreq/interactive/max_freq_hysteresis
+          echo 633600 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+          echo 1 > /sys/devices/system/cpu/cpu0/cpufreq/interactive/ignore_hispeed_on_notif
+          echo 1 > /sys/devices/system/cpu/cpu0/cpufreq/interactive/fast_ramp_down
+
+          # online CPU4
+          echo 1 > /sys/devices/system/cpu/cpu4/online
+          # configure governor settings for big cluster
+          echo "interactive" > /sys/devices/system/cpu/cpu4/cpufreq/scaling_governor
+          echo 1 > /sys/devices/system/cpu/cpu4/cpufreq/interactive/use_sched_load
+          echo 1 > /sys/devices/system/cpu/cpu4/cpufreq/interactive/use_migration_notif
+          echo "19000 1401600:39000" > /sys/devices/system/cpu/cpu4/cpufreq/interactive/above_hispeed_delay
+          echo 90 > /sys/devices/system/cpu/cpu4/cpufreq/interactive/go_hispeed_load
+          echo 20000 > /sys/devices/system/cpu/cpu4/cpufreq/interactive/timer_rate
+          echo 1401600 > /sys/devices/system/cpu/cpu4/cpufreq/interactive/hispeed_freq
+          echo 0 > /sys/devices/system/cpu/cpu4/cpufreq/interactive/io_is_busy
+          echo "85 1401600:90 2150400:95" > /sys/devices/system/cpu/cpu4/cpufreq/interactive/target_loads
+          echo 39000 > /sys/devices/system/cpu/cpu4/cpufreq/interactive/min_sample_time
+          echo 59000 > /sys/devices/system/cpu/cpu4/cpufreq/interactive/max_freq_hysteresis
+          echo 1113600 > /sys/devices/system/cpu/cpu4/cpufreq/scaling_min_freq
+          echo 1 > /sys/devices/system/cpu/cpu4/cpufreq/interactive/ignore_hispeed_on_notif
+          echo 1 > /sys/devices/system/cpu/cpu4/cpufreq/interactive/fast_ramp_down
+
+        fi
+
+            echo 2 > /sys/devices/system/cpu/cpu4/core_ctl/min_cpus
+            echo 60 > /sys/devices/system/cpu/cpu4/core_ctl/busy_up_thres
+            echo 30 > /sys/devices/system/cpu/cpu4/core_ctl/busy_down_thres
+            echo 100 > /sys/devices/system/cpu/cpu4/core_ctl/offline_delay_ms
+            echo 1 > /sys/devices/system/cpu/cpu4/core_ctl/is_big_cluster
+            echo 4 > /sys/devices/system/cpu/cpu4/core_ctl/task_thres
+
+            # Setting b.L scheduler parameters
+            echo 96 > /proc/sys/kernel/sched_upmigrate
+            echo 90 > /proc/sys/kernel/sched_downmigrate
+            echo 140 > /proc/sys/kernel/sched_group_upmigrate
+            echo 120 > /proc/sys/kernel/sched_group_downmigrate
+            echo 0 > /proc/sys/kernel/sched_select_prev_cpu_us
+            echo 400000 > /proc/sys/kernel/sched_freq_inc_notify
+            echo 400000 > /proc/sys/kernel/sched_freq_dec_notify
+            echo 5 > /proc/sys/kernel/sched_spill_nr_run
+            echo 1 > /proc/sys/kernel/sched_restrict_cluster_spill
+            echo 100000 > /proc/sys/kernel/sched_short_burst_ns
+            echo 1 > /proc/sys/kernel/sched_prefer_sync_wakee_to_waker
+            echo 20 > /proc/sys/kernel/sched_small_wakee_task_load
+
+
 }
 ####SDM 660 ###
 
@@ -582,6 +653,14 @@ esac
 
 case "$target" in
      "sdm660")
+     if [ -f /sys/devices/soc0/soc_id ]; then
+             soc_id=`cat /sys/devices/soc0/soc_id`
+     else
+             soc_id=`cat /sys/devices/system/soc/soc0/id`
+     fi
+     #Apply settings for sdm660, sdm636,sda636
+     case "$soc_id" in
+             "317" | "324" | "325" | "326" | "345" | "346" )
      #execute his EAS configuration
      sdm660_configuration()
      #configure memory features
@@ -590,4 +669,6 @@ case "$target" in
      #to know if this was executed
      setprop vendor.xperience.post_boot.parsed sdm660
      ;;
+   esac
+  ;;
 esac
