@@ -657,6 +657,7 @@ case "$target" in
     configure_zram_parameters
     #to know if this was executed
     setprop vendor.xperience.post_boot.parsed sdm660
+    setprop vendor.xperience.post_boot.soc_id $soc_id
     ;;
   esac
   ;;
