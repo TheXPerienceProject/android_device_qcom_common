@@ -348,7 +348,7 @@ function msm8226_config() {
   echo 1 >/sys/devices/system/cpu/cpu1/online
   echo 1 >/sys/devices/system/cpu/cpu2/online
   echo 1 >/sys/devices/system/cpu/cpu3/online
-  echo "ondemand" >/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+  #echo "ondemand" >/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
   echo 50000 >/sys/devices/system/cpu/cpufreq/ondemand/sampling_rate
   echo 90 >/sys/devices/system/cpu/cpufreq/ondemand/up_threshold
   echo 1 >/sys/devices/system/cpu/cpufreq/ondemand/io_is_busy
@@ -368,6 +368,13 @@ function msm8226_config() {
   chmod -h 664 /sys/devices/system/cpu/cpu1/online
   chmod -h 664 /sys/devices/system/cpu/cpu2/online
   chmod -h 664 /sys/devices/system/cpu/cpu3/online
+  #Configure intelimm by default to avoid lags
+
+  echo 1190400 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq
+  echo 1190400 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
+  echo 600000 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+  echo "intellimm" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+
 }
 
 function sdm660_configuration() {
