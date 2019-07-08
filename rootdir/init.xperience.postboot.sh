@@ -370,9 +370,13 @@ function msm8226_config() {
 
   echo 1190400 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq
   echo 1190400 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
-  echo 1190400 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
-  echo "ondemand" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+  echo 192000 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+  echo "intellidemand" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
   start mpdecision
+  #enable doubletap2wake
+  echo 1 > /sys/android_touch/doubletap2wake
+  # force zram on lz4
+  echo lz4 > /sys/block/zram0/comp_algorithm
 
 }
 
