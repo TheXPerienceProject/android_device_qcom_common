@@ -293,7 +293,7 @@ endif #QCPATH
 # limitations under the License.
 
 LOCAL_MODULE       := init.xperience.postboot.sh
-LOCAL_MODULE_TAGS  := optional eng
+LOCAL_MODULE_TAGS  := optional
 LOCAL_MODULE_CLASS := ETC
 LOCAL_SRC_FILES    := init.xperience.postboot.sh
 LOCAL_MODULE_PATH  := $(TARGET_OUT_VENDOR_EXECUTABLES)
