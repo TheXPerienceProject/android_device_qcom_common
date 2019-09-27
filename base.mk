@@ -377,9 +377,9 @@ IPROUTE2 := ip
 IPROUTE2 += libiprouteutil
 
 #IPACM
-IPACM += ipacm
-IPACM += IPACM_cfg.xml
-IPACM += ipacm-diag
+#IPACM += ipacm
+#IPACM += IPACM_cfg.xml
+#IPACM += ipacm-diag
 
 #IPTABLES
 IPTABLES := libiptc
@@ -875,8 +875,8 @@ WLAN += pronto_wlan.ko
 WLAN += qca_cld_wlan.ko
 
 #FSTMAN
-FSTMAN := fstman
-FSTMAN += fstman.ini
+#FSTMAN := fstman
+#FSTMAN += fstman.ini
 
 #FD_LEAK
 FD_LEAK := libc_leak_detector
@@ -925,7 +925,7 @@ PRODUCT_PACKAGES += \
 endif
 
 ifeq ($(TARGET_HAS_LOW_RAM),true)
-    DELAUN := NightfallQuickStepGo
+    DELAUN := Launcher3QuickStepGo
 else
     # Live Wallpapers
     PRODUCT_PACKAGES += \
@@ -933,7 +933,7 @@ else
             LiveWallpapersPicker \
             VisualizationWallpapers
 
-    DELAUN := NightfallQuickStep
+    DELAUN := Launcher3QuickStep
 endif
 
 PRODUCT_PACKAGES += $(ALSA_HARDWARE)
@@ -1036,8 +1036,8 @@ PRODUCT_PACKAGES += $(VT_QTI_PERMISSIONS)
 PRODUCT_PACKAGES += $(IMS_SETTINGS)
 PRODUCT_PACKAGES += $(CRDA)
 PRODUCT_PACKAGES += $(WLAN)
-PRODUCT_PACKAGES += $(IPACM)
-PRODUCT_PACKAGES += $(FSTMAN)
+#PRODUCT_PACKAGES += $(IPACM)
+#PRODUCT_PACKAGES += $(FSTMAN)
 PRODUCT_PACKAGES += $(FD_LEAK)
 PRODUCT_PACKAGES += $(IMS_EXT)
 # Temp workarround for b/36603742
