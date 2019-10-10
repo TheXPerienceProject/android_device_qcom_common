@@ -658,10 +658,10 @@ LIBQDMETADATA := libqdMetaData
 
 #LIBPOWER
 ifneq ($(TARGET_USES_NON_LEGACY_POWERHAL), true)
-LIBPOWER := power.qcom
+#LIBPOWER := power.qcom
 #LIBPOWER -- Add HIDL Packages
-LIBPOWER += android.hardware.power@1.0-impl
-LIBPOWER += android.hardware.power@1.0-service
+#LIBPOWER += android.hardware.power@1.0-impl
+#LIBPOWER += android.hardware.power@1.0-service
 endif
 
 #LLVM for RenderScript
@@ -1000,7 +1000,7 @@ PRODUCT_PACKAGES += $(LIBPERFLOCK)
 PRODUCT_PACKAGES += $(LIBQCOMUI)
 PRODUCT_PACKAGES += $(LIBQDUTILS)
 PRODUCT_PACKAGES += $(LIBQDMETADATA)
-PRODUCT_PACKAGES += $(LIBPOWER)
+#PRODUCT_PACKAGES += $(LIBPOWER)
 PRODUCT_PACKAGES += $(LOC_API)
 PRODUCT_PACKAGES += $(MEDIA_PROFILES)
 PRODUCT_PACKAGES += $(MM_AUDIO)
