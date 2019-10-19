@@ -485,6 +485,39 @@ function sdm660_configuration() {
   echo 1> proc/sys/kernel/sched_prefer_sync_wakee_to_waker
   echo 20> proc/sys/kernel/sched_small_wakee_task_load
 
+    # cpuset settings
+    echo 0-3 > /dev/cpuset/background/cpus
+    echo 0-3 > /dev/cpuset/system-background/cpus
+
+            # Enable bus-dcvs
+            for cpubw in /sys/class/devfreq/*qcom,cpubw*
+            do
+                echo "bw_hwmon" > $cpubw/governor
+                echo 50 > $cpubw/polling_interval
+                echo 762 > $cpubw/min_freq
+                echo "1525 3143 5859 7759 9887 10327 11863 13763" > $cpubw/bw_hwmon/mbps_zones
+                echo 4 > $cpubw/bw_hwmon/sample_ms
+                echo 85 > $cpubw/bw_hwmon/io_percent
+                echo 100 > $cpubw/bw_hwmon/decay_rate
+                echo 50 > $cpubw/bw_hwmon/bw_step
+                echo 20 > $cpubw/bw_hwmon/hist_memory
+                echo 0 > $cpubw/bw_hwmon/hyst_length
+                echo 80 > $cpubw/bw_hwmon/down_thres
+                echo 0 > $cpubw/bw_hwmon/low_power_ceil_mbps
+                echo 34 > $cpubw/bw_hwmon/low_power_io_percent
+                echo 20 > $cpubw/bw_hwmon/low_power_delay
+                echo 0 > $cpubw/bw_hwmon/guard_band_mbps
+                echo 250 > $cpubw/bw_hwmon/up_scale
+                echo 1600 > $cpubw/bw_hwmon/idle_mbps
+            done
+
+            for memlat in /sys/class/devfreq/*qcom,memlat-cpu*
+            do
+                echo "mem_latency" > $memlat/governor
+                echo 10 > $memlat/polling_interval
+                echo 400 > $memlat/mem_latency/ratio_ceil
+            done
+            echo "cpufreq" > /sys/class/devfreq/soc:qcom,mincpubw/governor
 }
 
 ####SDM 660 ###
@@ -508,32 +541,63 @@ function configure_zram_parameters() {
 
   low_ram=$(getprop ro.config.low_ram)
 
-  # Zram disk - 75% for Go devices.
-  # For 512MB Go device, size = 384MB, set same for Non-Go.
-  # For 1GB Go device, size = 768MB, set same for Non-Go.
-  # For >=2GB Non-Go device, size = 1GB
-  # And enable lz4 zram compression for Go targets.
-  # Some devices like Xiaomi have different variants
-  # 2GB and 3gb others devices have variants of 1gb 2gb and 3gb
-  # to make it more easy for all we can use this code extracted from CAF
-  # Copyright (c) 2012-2013, 2016-2018, The Linux Foundation. All rights reserved.
+    # Zram disk - 75% for Go devices.
+    # For 512MB Go device, size = 384MB, set same for Non-Go.
+    # For 1GB Go device, size = 768MB, set same for Non-Go.
+    # For >1GB and <=3GB Non-Go device, size = 1GB
+    # For >3GB and <=4GB Non-Go device, size = 2GB
+    # For >4GB Non-Go device, size = 4GB
+    # And enable lz4 zram compression for Go targets.
+    # to make it more easy for all we can use this code extracted from CAF
+    # Copyright (c) 2012-2013, 2016-2018, The Linux Foundation. All rights reserved.
 
   if [ "$low_ram" == "true" ]; then
     echo lz4 > /sys/block/zram0/comp_algorithm
   fi
 
-  if [ -f /sys/block/zram0/disksize ]; then
-    if [ $MemTotal -le 524288 ]; then
-      echo 402653184 > /sys/block/zram0/disksize
-    elif [ $MemTotal -le 1048576 ]; then
-      echo 805306368 > /sys/block/zram0/disksize
-    else
-      # Set Zram disk size=1GB for >=2GB Non-Go targets.
-      echo 1073741824 > /sys/block/zram0/disksize
+    if [ -f /sys/block/zram0/disksize ]; then
+        if [ -f /sys/block/zram0/use_dedup ]; then
+            echo 1 > /sys/block/zram0/use_dedup
+        fi
+        if [ $MemTotal -le 524288 ]; then
+            echo 402653184 > /sys/block/zram0/disksize
+        elif [ $MemTotal -le 1048576 ]; then
+            echo 805306368 > /sys/block/zram0/disksize
+        elif [ $MemTotal -le 3145728 ]; then
+            echo 1073741824 > /sys/block/zram0/disksize
+        elif [ $MemTotal -le 4194304 ]; then
+            echo 2147483648 > /sys/block/zram0/disksize
+        else
+            echo 4294967296 > /sys/block/zram0/disksize
+        fi
+        mkswap /dev/block/zram0
+        swapon /dev/block/zram0 -p 32758
     fi
-    mkswap /dev/block/zram0
-    swapon /dev/block/zram0 -p 32758
-  fi
+}
+
+function configure_read_ahead_kb_values() {
+    MemTotalStr=`cat /proc/meminfo | grep MemTotal`
+    MemTotal=${MemTotalStr:16:8}
+
+    # Set 128 for <= 3GB &
+    # set 512 for >= 4GB targets.
+    if [ $MemTotal -le 3145728 ]; then
+        echo 128 > /sys/block/mmcblk0/bdi/read_ahead_kb
+        echo 128 > /sys/block/mmcblk0/queue/read_ahead_kb
+        echo 128 > /sys/block/mmcblk0rpmb/bdi/read_ahead_kb
+        echo 128 > /sys/block/mmcblk0rpmb/queue/read_ahead_kb
+        echo 128 > /sys/block/dm-0/queue/read_ahead_kb
+        echo 128 > /sys/block/dm-1/queue/read_ahead_kb
+        echo 128 > /sys/block/dm-2/queue/read_ahead_kb
+    else
+        echo 512 > /sys/block/mmcblk0/bdi/read_ahead_kb
+        echo 512 > /sys/block/mmcblk0/queue/read_ahead_kb
+        echo 512 > /sys/block/mmcblk0rpmb/bdi/read_ahead_kb
+        echo 512 > /sys/block/mmcblk0rpmb/queue/read_ahead_kb
+        echo 512 > /sys/block/dm-0/queue/read_ahead_kb
+        echo 512 > /sys/block/dm-1/queue/read_ahead_kb
+        echo 512 > /sys/block/dm-2/queue/read_ahead_kb
+    fi
 }
 
 function enable_memory_features() {
@@ -595,6 +659,7 @@ case "$target" in
   msm8226_config
   configure_zram_parameters
   enable_memory_features
+  configure_read_ahead_kb_values
   setprop vendor.xperience.post_boot.parsed 8226
   ;;
 esac
@@ -612,6 +677,7 @@ case "$target" in
   #configure memory features
   enable_memory_features
   configure_zram_parameters
+  configure_read_ahead_kb_values
   #to know if this was executed
   setprop vendor.xperience.post_boot.parsed 8917
   ;;
@@ -630,6 +696,7 @@ case "$target" in
   #configure memory features
   enable_memory_features
   configure_zram_parameters
+  configure_read_ahead_kb_values
   #to know if this was executed
   setprop vendor.xperience.post_boot.parsed 8937
   ;;
@@ -647,6 +714,7 @@ case "$target" in
   #configure memory features
   enable_memory_features
   configure_zram_parameters
+  configure_read_ahead_kb_values
   #to know if this was executed
   setprop vendor.xperience.post_boot.parsed 8953
   ;;
@@ -665,6 +733,7 @@ case "$target" in
     #execute his EAS configuration
     sdm660_configuration() enable_memory_features #configure memory features
     configure_zram_parameters
+    configure_read_ahead_kb_values
     #to know if this was executed
     setprop vendor.xperience.post_boot.parsed sdm660
     setprop vendor.xperience.post_boot.soc_id $soc_id
