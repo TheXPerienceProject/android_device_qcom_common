@@ -395,14 +395,14 @@ function sdm660_configuration() {
     echo 1113600> sys/devices/system/cpu/cpu4/cpufreq/scaling_min_freq
 
     #extra configs for SchedAlessa and SchedUtil
-    echo 0> sys/devices/system/cpu/cpu0/cpufreq/schedutil/up_rate_limit_us
-    echo 0> sys/devices/system/cpu/cpu0/cpufreq/schedutil/down_rate_limit_us
-    echo 0> sys/devices/system/cpu/cpu0/cpufreq/schedalessa/up_rate_limit_us
-    echo 0> sys/devices/system/cpu/cpu0/cpufreq/schedalessa/down_rate_limit_us
-    echo 0> sys/devices/system/cpu/cpu4/cpufreq/schedutil/up_rate_limit_us
-    echo 0> sys/devices/system/cpu/cpu4/cpufreq/schedutil/down_rate_limit_us
-    echo 0> sys/devices/system/cpu/cpu4/cpufreq/schedalessa/up_rate_limit_us
-    echo 0> sys/devices/system/cpu/cpu4/cpufreq/schedalessa/down_rate_limit_us
+    echo 500> sys/devices/system/cpu/cpu0/cpufreq/schedutil/up_rate_limit_us
+    echo 20000> sys/devices/system/cpu/cpu0/cpufreq/schedutil/down_rate_limit_us
+    echo 500> sys/devices/system/cpu/cpu0/cpufreq/schedalessa/up_rate_limit_us
+    echo 20000> sys/devices/system/cpu/cpu0/cpufreq/schedalessa/down_rate_limit_us
+    echo 500> sys/devices/system/cpu/cpu4/cpufreq/schedutil/up_rate_limit_us
+    echo 20000> sys/devices/system/cpu/cpu4/cpufreq/schedutil/down_rate_limit_us
+    echo 500> sys/devices/system/cpu/cpu4/cpufreq/schedalessa/up_rate_limit_us
+    echo 20000> sys/devices/system/cpu/cpu4/cpufreq/schedalessa/down_rate_limit_us
 
     echo 1> proc/sys/kernel/sched_walt_rotate_big_tasks
   else
@@ -417,10 +417,10 @@ function sdm660_configuration() {
     echo 1113600> sys/devices/system/cpu/cpu4/cpufreq/scaling_min_freq
 
     #extra configs for SchedAlessa and SchedUtil
-    echo 0> sys/devices/system/cpu/cpu0/cpufreq/schedutil/up_rate_limit_us
-    echo 0> sys/devices/system/cpu/cpu0/cpufreq/schedutil/down_rate_limit_us
-    echo 0> sys/devices/system/cpu/cpu4/cpufreq/schedutil/up_rate_limit_us
-    echo 0> sys/devices/system/cpu/cpu4/cpufreq/schedutil/down_rate_limit_us
+    echo 500> sys/devices/system/cpu/cpu0/cpufreq/schedutil/up_rate_limit_us
+    echo 20000> sys/devices/system/cpu/cpu0/cpufreq/schedutil/down_rate_limit_us
+    echo 500> sys/devices/system/cpu/cpu4/cpufreq/schedutil/up_rate_limit_us
+    echo 20000> sys/devices/system/cpu/cpu4/cpufreq/schedutil/down_rate_limit_us
     echo 1> proc/sys/kernel/sched_walt_rotate_big_tasks
 
   fi
@@ -486,8 +486,9 @@ function sdm660_configuration() {
   echo 20> proc/sys/kernel/sched_small_wakee_task_load
 
     # cpuset settings
-    echo 0-3 > /dev/cpuset/background/cpus
-    echo 0-3 > /dev/cpuset/system-background/cpus
+    echo 0-1 > /dev/cpuset/background/cpus
+    echo 0-2 > /dev/cpuset/system-background/cpus
+    echo 0-3 > /dev/cpuset/restricted/cpus
 
             # Enable bus-dcvs
             for cpubw in /sys/class/devfreq/*qcom,cpubw*
@@ -518,6 +519,9 @@ function sdm660_configuration() {
                 echo 400 > $memlat/mem_latency/ratio_ceil
             done
             echo "cpufreq" > /sys/class/devfreq/soc:qcom,mincpubw/governor
+
+    #Stune boost changes
+    echo 1 > proc/sys/kernel/sched_cfs_boost
 }
 
 ####SDM 660 ###
