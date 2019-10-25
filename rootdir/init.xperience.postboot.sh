@@ -520,8 +520,6 @@ function sdm660_configuration() {
             done
             echo "cpufreq" > /sys/class/devfreq/soc:qcom,mincpubw/governor
 
-    #Stune boost changes
-    echo 1 > proc/sys/kernel/sched_cfs_boost
 }
 
 ####SDM 660 ###
