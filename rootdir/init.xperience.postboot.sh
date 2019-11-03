@@ -651,6 +651,13 @@ function buning_tianma_fix() {
     setprop vendor.xperience.post_boot.color_calibration panel_td4310
   fi
 
+  # Lavender Tianma
+  if [ "$panel_model" == "panel_name=tianma nt36672a fhdplus video mode dsi panel" ]; then
+    echo "1" > /sys/devices/platform/kcal_ctrl.0/kcal_enable
+    echo "237 237 237" > /sys/devices/platform/kcal_ctrl.0/kcal
+    setprop vendor.xperience.post_boot.color_calibration panel_nt35596
+  fi
+
 }
 
 # call tianma burning fix
