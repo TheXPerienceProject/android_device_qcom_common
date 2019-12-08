@@ -660,6 +660,13 @@ function buning_tianma_fix() {
 
 }
 
+function fixTethering(){
+  ln -sf /system/vendor/etc/hostapd/hostapd.conf /data/vendor/wifi/hostapd/hostapd.conf
+}
+
+#some devices have issues doing the copy of the hostapd.conf file so fix them
+fixTethering
+
 # call tianma burning fix
 buning_tianma_fix
 
