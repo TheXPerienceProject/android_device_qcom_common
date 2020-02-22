@@ -553,9 +553,17 @@ function configure_zram_parameters() {
     # to make it more easy for all we can use this code extracted from CAF
     # Copyright (c) 2012-2013, 2016-2018, The Linux Foundation. All rights reserved.
 
-  if [ "$low_ram" == "true" ]; then
-    echo lz4 > /sys/block/zram0/comp_algorithm
-  fi
+    RamSizeGB=`echo "($MemTotal / 1048576 ) + 1" | bc`
+    zRamSizeBytes=`echo "$RamSizeGB * 1024 * 1024 * 1024 / 2" | bc`
+    zRamSizeMB=`echo "$RamSizeGB * 1024 / 2" | bc`
+    # use MB avoid 32 bit overflow
+    if [ $zRamSizeMB -gt 4096 ]; then
+        zRamSizeBytes=4294967296
+    fi
+
+    if [ "$low_ram" == "true" ]; then
+        echo lz4 > /sys/block/zram0/comp_algorithm
+    fi
 
     if [ -f /sys/block/zram0/disksize ]; then
         if [ -f /sys/block/zram0/use_dedup ]; then
@@ -565,13 +573,19 @@ function configure_zram_parameters() {
             echo 402653184 > /sys/block/zram0/disksize
         elif [ $MemTotal -le 1048576 ]; then
             echo 805306368 > /sys/block/zram0/disksize
-        elif [ $MemTotal -le 3145728 ]; then
-            echo 1073741824 > /sys/block/zram0/disksize
-        elif [ $MemTotal -le 4194304 ]; then
-            echo 2147483648 > /sys/block/zram0/disksize
         else
-            echo 4294967296 > /sys/block/zram0/disksize
+            echo $zRamSizeBytes > /sys/block/zram0/disksize
         fi
+
+        # ZRAM may use more memory than it saves if SLAB_STORE_USER
+        # debug option is enabled.
+        if [ -e /sys/kernel/slab/zs_handle ]; then
+            echo 0 > /sys/kernel/slab/zs_handle/store_user
+        fi
+        if [ -e /sys/kernel/slab/zspage ]; then
+            echo 0 > /sys/kernel/slab/zspage/store_user
+        fi
+
         mkswap /dev/block/zram0
         swapon /dev/block/zram0 -p 32758
     fi
