@@ -712,6 +712,8 @@ case "$target" in
   enable_memory_features
   configure_read_ahead_kb_values
   setprop vendor.xperience.post_boot.parsed 8226
+  setprop ro.vendor.xperience.config.swap true
+  enable_swap
   ;;
 esac
 
