@@ -1,6 +1,6 @@
 #! /vendor/bin/sh
 
-# Copyright (c) 2012-2013, 2016-2019, The Linux Foundation. All rights reserved.
+# Copyright (c) 2012-2013, 2016-2020, The Linux Foundation. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -340,10 +340,14 @@ function configure_zram_parameters() {
     # Zram disk - 75% for Go devices.
     # For 512MB Go device, size = 384MB, set same for Non-Go.
     # For 1GB Go device, size = 768MB, set same for Non-Go.
-    # For >1GB and <=3GB Non-Go device, size = 1GB
-    # For >3GB and <=4GB Non-Go device, size = 2GB
-    # For >4GB Non-Go device, size = 4GB
+    # For >=2GB Non-Go devices, size = 50% of RAM size. Limit the size to 4GB.
     # And enable lz4 zram compression for Go targets.
+
+    RamSizeGB=`echo "($MemTotal / 1048576 ) + 1" | bc`
+    zRamSizeBytes=`echo "$RamSizeGB * 1024 * 1024 * 1024 / 2" | bc`
+    if [ $zRamSizeBytes -gt 4294967296 ]; then
+        zRamSizeBytes=4294967296
+    fi
 
     if [ "$low_ram" == "true" ]; then
         echo lz4 > /sys/block/zram0/comp_algorithm
@@ -357,12 +361,8 @@ function configure_zram_parameters() {
             echo 402653184 > /sys/block/zram0/disksize
         elif [ $MemTotal -le 1048576 ]; then
             echo 805306368 > /sys/block/zram0/disksize
-        elif [ $MemTotal -le 3145728 ]; then
-            echo 1073741824 > /sys/block/zram0/disksize
-        elif [ $MemTotal -le 4194304 ]; then
-            echo 2147483648 > /sys/block/zram0/disksize
         else
-            echo 4294967296 > /sys/block/zram0/disksize
+            echo $zRamSizeBytes > /sys/block/zram0/disksize
         fi
 
         # ZRAM may use more memory than it saves if SLAB_STORE_USER
@@ -383,24 +383,22 @@ function configure_read_ahead_kb_values() {
     MemTotalStr=`cat /proc/meminfo | grep MemTotal`
     MemTotal=${MemTotalStr:16:8}
 
+    dmpts=$(ls /sys/block/*/queue/read_ahead_kb | grep -e dm -e mmc)
+
     # Set 128 for <= 3GB &
     # set 512 for >= 4GB targets.
     if [ $MemTotal -le 3145728 ]; then
         echo 128 > /sys/block/mmcblk0/bdi/read_ahead_kb
-        echo 128 > /sys/block/mmcblk0/queue/read_ahead_kb
         echo 128 > /sys/block/mmcblk0rpmb/bdi/read_ahead_kb
-        echo 128 > /sys/block/mmcblk0rpmb/queue/read_ahead_kb
-        echo 128 > /sys/block/dm-0/queue/read_ahead_kb
-        echo 128 > /sys/block/dm-1/queue/read_ahead_kb
-        echo 128 > /sys/block/dm-2/queue/read_ahead_kb
+        for dm in $dmpts; do
+            echo 128 > $dm
+        done
     else
         echo 512 > /sys/block/mmcblk0/bdi/read_ahead_kb
-        echo 512 > /sys/block/mmcblk0/queue/read_ahead_kb
         echo 512 > /sys/block/mmcblk0rpmb/bdi/read_ahead_kb
-        echo 512 > /sys/block/mmcblk0rpmb/queue/read_ahead_kb
-        echo 512 > /sys/block/dm-0/queue/read_ahead_kb
-        echo 512 > /sys/block/dm-1/queue/read_ahead_kb
-        echo 512 > /sys/block/dm-2/queue/read_ahead_kb
+        for dm in $dmpts; do
+            echo 512 > $dm
+        done
     fi
 }
 
@@ -3389,6 +3387,7 @@ case "$target" in
     echo 0 > /proc/sys/kernel/sched_coloc_busy_hyst_max_ms
 
     # disable unfiltering
+    echo 20000000 > /proc/sys/kernel/sched_task_unfilter_period
     echo 1 > /proc/sys/kernel/sched_task_unfilter_nr_windows
 
     # configure governor settings for silver cluster
@@ -3424,7 +3423,7 @@ case "$target" in
 
     # colocation v3 settings
     echo 51 > /proc/sys/kernel/sched_min_task_util_for_boost
-    echo 51 > /proc/sys/kernel/sched_min_task_util_for_colocation
+    echo 35 > /proc/sys/kernel/sched_min_task_util_for_colocation
 
     # Enable conservative pl
     echo 1 > /proc/sys/kernel/sched_conservative_pl
@@ -3434,6 +3433,19 @@ case "$target" in
 
     # Set Memory parameters
     configure_memory_parameters
+
+    if [ `cat /sys/devices/soc0/revision` == "2.0" ]; then
+         # r2.0 related changes
+         echo "0:1075200" > /sys/devices/system/cpu/cpu_boost/input_boost_freq
+         echo 610000 > /sys/devices/system/cpu/cpufreq/policy0/schedutil/rtg_boost_freq
+         echo 1075200 > /sys/devices/system/cpu/cpufreq/policy0/schedutil/hispeed_freq
+         echo 1152000 > /sys/devices/system/cpu/cpufreq/policy6/schedutil/hispeed_freq
+         echo 1401600 > /sys/devices/system/cpu/cpufreq/policy7/schedutil/hispeed_freq
+         echo 614400 > /sys/devices/system/cpu/cpufreq/policy0/scaling_min_freq
+         echo 652800 > /sys/devices/system/cpu/cpufreq/policy6/scaling_min_freq
+         echo 806400 > /sys/devices/system/cpu/cpufreq/policy7/scaling_min_freq
+         echo 83 > /proc/sys/kernel/sched_asym_cap_sibling_freq_match_pct
+    fi
 
     # Enable bus-dcvs
     for device in /sys/devices/platform/soc
@@ -3505,7 +3517,7 @@ case "$target" in
 	for memlat in $device/*qcom,devfreq-l3/*cpu*-lat/devfreq/*cpu*-lat
         do
             echo "mem_latency" > $memlat/governor
-            echo 10 > $memlat/polling_interval
+            echo 8 > $memlat/polling_interval
             echo 400 > $memlat/mem_latency/ratio_ceil
         done
 
@@ -3519,7 +3531,7 @@ case "$target" in
 	for memlat in $device/*cpu*-lat/devfreq/*cpu*-lat
 	do
 	    echo "mem_latency" > $memlat/governor
-	    echo 10 > $memlat/polling_interval
+	    echo 8 > $memlat/polling_interval
 	    echo 400 > $memlat/mem_latency/ratio_ceil
         done
 
@@ -3539,7 +3551,7 @@ case "$target" in
         for latfloor in $device/*cpu*-ddr-latfloor*/devfreq/*cpu-ddr-latfloor*
         do
             echo "compute" > $latfloor/governor
-            echo 10 > $latfloor/polling_interval
+            echo 8 > $latfloor/polling_interval
         done
     done
 
@@ -4564,7 +4576,7 @@ case "$target" in
 esac
 case "$target" in
 	"kona")
-
+	rev=`cat /sys/devices/soc0/revision`
 	ddr_type=`od -An -tx /proc/device-tree/memory/ddr_device_type`
 	ddr_type4="07"
 	ddr_type5="08"
@@ -4614,12 +4626,12 @@ case "$target" in
 	echo "schedutil" > /sys/devices/system/cpu/cpufreq/policy0/scaling_governor
 	echo 0 > /sys/devices/system/cpu/cpufreq/policy0/schedutil/down_rate_limit_us
 	echo 0 > /sys/devices/system/cpu/cpufreq/policy0/schedutil/up_rate_limit_us
-        if [ `cat /sys/devices/soc0/revision` == "2.0" ]; then
+        if [ $rev == "2.0" ] || [ $rev == "2.1"]; then
 		echo 1248000 > /sys/devices/system/cpu/cpufreq/policy0/schedutil/hispeed_freq
 	else
 		echo 1228800 > /sys/devices/system/cpu/cpufreq/policy0/schedutil/hispeed_freq
 	fi
-	echo 518400 > /sys/devices/system/cpu/cpufreq/policy0/scaling_min_freq
+	echo 691200 > /sys/devices/system/cpu/cpufreq/policy0/scaling_min_freq
 	echo 1 > /sys/devices/system/cpu/cpufreq/policy0/schedutil/pl
 
 	# configure input boost settings
@@ -4637,7 +4649,7 @@ case "$target" in
 	echo "schedutil" > /sys/devices/system/cpu/cpufreq/policy7/scaling_governor
 	echo 0 > /sys/devices/system/cpu/cpufreq/policy7/schedutil/down_rate_limit_us
 	echo 0 > /sys/devices/system/cpu/cpufreq/policy7/schedutil/up_rate_limit_us
-        if [ `cat /sys/devices/soc0/revision` == "2.0" ]; then
+        if [ $rev == "2.0" ] || [ $rev == "2.1"]; then
 		echo 1632000 > /sys/devices/system/cpu/cpufreq/policy7/schedutil/hispeed_freq
 	else
 		echo 1612800 > /sys/devices/system/cpu/cpufreq/policy7/schedutil/hispeed_freq
@@ -4694,7 +4706,7 @@ case "$target" in
 			echo "1720 2086 2929 3879 5931 6881 7980 10437" > $npubw/bw_hwmon/mbps_zones
 		fi
 		echo 4 > $npubw/bw_hwmon/sample_ms
-		echo 80 > $npubw/bw_hwmon/io_percent
+		echo 160 > $npubw/bw_hwmon/io_percent
 		echo 20 > $npubw/bw_hwmon/hist_memory
 		echo 10 > $npubw/bw_hwmon/hyst_length
 		echo 30 > $npubw/bw_hwmon/down_thres
@@ -4711,7 +4723,7 @@ case "$target" in
 		echo 40 > $npullccbw/polling_interval
 		echo "4577 7110 9155 12298 14236 15258" > $npullccbw/bw_hwmon/mbps_zones
 		echo 4 > $npullccbw/bw_hwmon/sample_ms
-		echo 100 > $npullccbw/bw_hwmon/io_percent
+		echo 160 > $npullccbw/bw_hwmon/io_percent
 		echo 20 > $npullccbw/bw_hwmon/hist_memory
 		echo 10 > $npullccbw/bw_hwmon/hyst_length
 		echo 30 > $npullccbw/bw_hwmon/down_thres
@@ -4724,7 +4736,7 @@ case "$target" in
 	    for memlat in $device/*qcom,devfreq-l3/*cpu*-lat/devfreq/*cpu*-lat
 	    do
 		echo "mem_latency" > $memlat/governor
-		echo 10 > $memlat/polling_interval
+		echo 8 > $memlat/polling_interval
 		echo 400 > $memlat/mem_latency/ratio_ceil
 	    done
 
@@ -4738,7 +4750,7 @@ case "$target" in
 	    for memlat in $device/*cpu*-lat/devfreq/*cpu*-lat
 	    do
 		echo "mem_latency" > $memlat/governor
-		echo 10 > $memlat/polling_interval
+		echo 8 > $memlat/polling_interval
 		echo 400 > $memlat/mem_latency/ratio_ceil
 	    done
 
@@ -4746,7 +4758,7 @@ case "$target" in
 	    for latfloor in $device/*cpu-ddr-latfloor*/devfreq/*cpu-ddr-latfloor*
 	    do
 		echo "compute" > $latfloor/governor
-		echo 10 > $latfloor/polling_interval
+		echo 8 > $latfloor/polling_interval
 	    done
 
 	    #Gold L3 ratio ceil
@@ -4759,6 +4771,14 @@ case "$target" in
 	    for l3prime in $device/*qcom,devfreq-l3/*cpu7-cpu-l3-lat/devfreq/*cpu7-cpu-l3-lat
 	    do
 		echo 20000 > $l3prime/mem_latency/ratio_ceil
+	    done
+
+	    #Enable mem_latency governor for qoslat
+	    for qoslat in $device/*qoslat/devfreq/*qoslat
+	    do
+		echo "mem_latency" > $qoslat/governor
+		echo 10 > $qoslat/polling_interval
+		echo 50 > $qoslat/mem_latency/ratio_ceil
 	    done
 	done
     echo N > /sys/module/lpm_levels/parameters/sleep_disabled
@@ -5061,7 +5081,7 @@ case "$target" in
         start mpdecision
         echo 512 > /sys/block/mmcblk0/bdi/read_ahead_kb
     ;;
-    "msm8909" | "msm8916" | "msm8937" | "msm8952" | "msm8953" | "msm8994" | "msm8992" | "msm8996" | "msm8998" | "sdm660" | "apq8098_latv" | "sdm845" | "sdm710" | "msmnile" | "msmsteppe" | "sm6150" | "kona" | "lito" | "trinket" | "atoll" )
+    "msm8909" | "msm8916" | "msm8937" | "msm8952" | "msm8953" | "msm8994" | "msm8992" | "msm8996" | "msm8998" | "sdm660" | "apq8098_latv" | "sdm845" | "sdm710" | "msmnile" | "msmsteppe" | "sm6150" | "kona" | "lito" | "trinket" | "atoll" | "lahaina" )
         setprop vendor.post_boot.parsed 1
     ;;
     "apq8084")

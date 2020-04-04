@@ -58,6 +58,9 @@ firmware_directories /vendor/firmware_mnt/image/
 /dev/synx_device          0660   root       camera
 /dev/hab                  0666   system     system
 
+#permissions for UFS RPMB BSG device node
+/dev/0:0:0:49476          0600   system     system
+
 #permissions for CSVT
 /dev/smd11                0660   radio      radio
 
@@ -141,6 +144,7 @@ firmware_directories /vendor/firmware_mnt/image/
 /dev/sec_nvm_*            0660   system     system
 /dev/cryptoapp            0660   system     system
 /dev/spdaemon_ssr         0660   system     system
+/dev/spu_hal_ssr          0660   system     system
 /dev/iuicc                0660   system     system
 /dev/iuicc0               0660   system     system
 /dev/iuicc1               0660   system     system
