@@ -293,11 +293,13 @@ EBTABLES += libebtc
 FASTPOWERON := FastBoot
 
 #FM
+ifeq ($(strip $(BOARD_HAVE_QCOM_FM)),true)
 FM := qcom.fmradio
 FM += libqcomfm_jni
 FM += fm_helium
 FM += ftm_fm_lib
 FM += libfm-hci
+endif
 
 #GPS
 GPS_HARDWARE := gps.conf
@@ -920,7 +922,6 @@ PRODUCT_PACKAGES := \
     SoundRecorder \
     IM \
     VoiceDialer \
-    FM2 \
     SnapdragonGallery \
     SnapdragonMusic \
     VideoEditor \
@@ -929,6 +930,10 @@ PRODUCT_PACKAGES := \
     wipowerservice \
     Mms
 
+ifeq ($(strip $(BOARD_HAVE_QCOM_FM)),true)
+PRODUCT_PACKAGES += \
+    FM
+endif
 ifneq ($(BOARD_HAVE_BLUETOOTH),false)
 PRODUCT_PACKAGES += \
     Bluetooth \
@@ -981,7 +986,9 @@ PRODUCT_PACKAGES += $(E2FSPROGS)
 PRODUCT_PACKAGES += $(EBTABLES)
 PRODUCT_PACKAGES += $(EXTENDEDMEDIA_EXT)
 PRODUCT_PACKAGES += $(FASTPOWERON)
+ifeq ($(strip $(BOARD_HAVE_QCOM_FM)),true)
 PRODUCT_PACKAGES += $(FM)
+endif
 PRODUCT_PACKAGES += $(GPS_HARDWARE)
 PRODUCT_PACKAGES += $(HDMID)
 PRODUCT_PACKAGES += $(HOSTAPD)
