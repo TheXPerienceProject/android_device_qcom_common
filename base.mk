@@ -42,6 +42,7 @@ QCOM_BOARD_PLATFORMS += kona
 QCOM_BOARD_PLATFORMS += lito
 QCOM_BOARD_PLATFORMS += bengal
 QCOM_BOARD_PLATFORMS += atoll
+QCOM_BOARD_PLATFORMS += lagoon
 QCOM_BOARD_PLATFORMS += $(TRINKET)
 
 LIBHDMI_CEC := hdmi_cec.msm8998
@@ -1116,9 +1117,7 @@ PRODUCT_PACKAGES_DEBUG += init.qcom.debug.sh
 
 PRODUCT_PACKAGES_DEBUG += $(TELEPHONY_DBG)
 
-# PRODUCT_COPY_FILES := \
-    frameworks/native/data/etc/android.hardware.camera.flash-autofocus.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.camera.flash-autofocus.xml \
-    frameworks/native/data/etc/android.hardware.camera.front.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.camera.front.xml \
+#PRODUCT_COPY_FILES := \
     frameworks/native/data/etc/android.hardware.camera.full.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.camera.full.xml\
     frameworks/native/data/etc/android.hardware.camera.raw.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.camera.raw.xml\
     frameworks/native/data/etc/android.hardware.telephony.gsm.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.telephony.gsm.xml \
@@ -1137,6 +1136,13 @@ PRODUCT_PACKAGES_DEBUG += $(TELEPHONY_DBG)
     frameworks/native/data/etc/android.hardware.bluetooth_le.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.bluetooth_le.xml \
     frameworks/native/data/etc/android.software.device_id_attestation.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.software.device_id_attestation.xml \
     frameworks/native/data/etc/android.software.verified_boot.xml:system/etc/permissions/android.software.verified_boot.xml
+
+# Disabled flashh for qcs605 target as flash not supported.
+ifneq (,$(filter qcs605, $(TARGET_BOARD_PLATFORM)))
+   PRODUCT_COPY_FILES += \
+        frameworks/native/data/etc/android.hardware.camera.flash-autofocus.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.camera.flash-autofocus.xml \
+        frameworks/native/data/etc/android.hardware.camera.front.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.camera.front.xml
+endif
 
 # Enable TDES support when KM4 is enabled
 ifeq ($(ENABLE_KM_4_0), true)
@@ -1310,6 +1316,7 @@ PRODUCT_PACKAGES_DEBUG += \
     init.qti.debug-lito.sh \
     init.qti.debug-trinket.sh \
     init.qti.debug-atoll.sh \
+    init.qti.debug-lagoon.sh \
     init.qti.debug-bengal.sh
 
 PRODUCT_PACKAGES += liboemaids_system
