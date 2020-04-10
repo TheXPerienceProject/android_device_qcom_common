@@ -1,6 +1,6 @@
 #! /vendor/bin/sh
 
-# Copyright  2018-2019 The XPerience Project
+# Copyright  2018-2019-2020 The XPerience Project
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -794,6 +794,82 @@ function sm6150_configuration() {
   esac
 }
 
+function sdm710_configuration() {
+    # Initial configurations for SDM710 need testing
+    # Maybe in the future i can do a proper configuration for performance for THIS
+    # SoC
+
+    #Enable bus-dcvs
+    # Use bw_hwmon to avoid janks
+    echo "bw_hwmon" > /sys/class/devfreq/soc:qcom,cpubw/governor
+    echo 50 > /sys/class/devfreq/soc:qcom,cpubw/polling_interval
+    echo "1144 1720 2086 2929 3879 5931 6881" > /sys/class/devfreq/soc:qcom,cpubw/bw_hwmon/mbps_zones
+    echo 4 > /sys/class/devfreq/soc:qcom,cpubw/bw_hwmon/sample_ms
+    echo 68 > /sys/class/devfreq/soc:qcom,cpubw/bw_hwmon/io_percent
+    echo 20 > /sys/class/devfreq/soc:qcom,cpubw/bw_hwmon/hist_memory
+    echo 10 > /sys/class/devfreq/soc:qcom,cpubw/bw_hwmon/hyst_length
+    echo 80 > /sys/class/devfreq/soc:qcom,cpubw/bw_hwmon/down_thres
+    echo 0 > /sys/class/devfreq/soc:qcom,cpubw/bw_hwmon/guard_band_mbps
+    echo 250 > /sys/class/devfreq/soc:qcom,cpubw/bw_hwmon/up_scale
+    echo 1600 > /sys/class/devfreq/soc:qcom,cpubw/bw_hwmon/idle_mbps
+    echo "cpufreq" > /sys/class/devfreq/soc:qcom,mincpubw/governor
+
+    #Optimize memory latency
+    echo "mem_latency" > /sys/class/devfreq/soc:qcom,memlat-cpu0/governor
+    echo 11 > /sys/class/devfreq/soc:qcom,memlat-cpu0/polling_interval
+    echo 400 > /sys/class/devfreq/soc:qcom,memlat-cpu0/mem_latency/ratio_ceil
+    echo "mem_latency" > /sys/class/devfreq/soc:qcom,memlat-cpu6/governor
+    echo 11 > /sys/class/devfreq/soc:qcom,memlat-cpu6/polling_interval
+    echo 400 > /sys/class/devfreq/soc:qcom,memlat-cpu6/mem_latency/ratio_ceil
+
+    #Enable mem_latency governor for L3 scaling
+    echo "mem_latency" > /sys/class/devfreq/soc:qcom,l3-cpu0/governor
+    echo 11 > /sys/class/devfreq/soc:qcom,l3-cpu0/polling_interval
+    echo 400 > /sys/class/devfreq/soc:qcom,l3-cpu0/mem_latency/ratio_ceil
+    echo "mem_latency" > /sys/class/devfreq/soc:qcom,l3-cpu6/governor
+    echo 11 > /sys/class/devfreq/soc:qcom,l3-cpu6/polling_interval
+    echo 400 > /sys/class/devfreq/soc:qcom,l3-cpu6/mem_latency/ratio_ceil
+
+    # Limit the min frequency of LC to 576MHz
+    echo 576000 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+
+    # Limit the min frequency of BC to 825MHz
+    echo 825600 > /sys/devices/system/cpu/cpu6/cpufreq/scaling_min_freq
+
+    # Change l3-cdsp to userspace governor
+    echo "userspace" > /sys/class/devfreq/soc:qcom,l3-cdsp/governor
+    chown -h system system /sys/class/devfreq/soc:qcom,l3-cdsp/userspace/set_freq
+
+    # Disable CPU Retention
+    echo N > /sys/module/lpm_levels/L3/cpu0/ret/idle_enabled
+    echo N > /sys/module/lpm_levels/L3/cpu1/ret/idle_enabled
+    echo N > /sys/module/lpm_levels/L3/cpu2/ret/idle_enabled
+    echo N > /sys/module/lpm_levels/L3/cpu3/ret/idle_enabled
+    echo N > /sys/module/lpm_levels/L3/cpu4/ret/idle_enabled
+    echo N > /sys/module/lpm_levels/L3/cpu5/ret/idle_enabled
+    echo N > /sys/module/lpm_levels/L3/cpu6/ret/idle_enabled
+    echo N > /sys/module/lpm_levels/L3/cpu7/ret/idle_enabled
+
+    # Optimize SchedUtil for little cluster
+    echo "schedutil" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+    echo 500 > /sys/devices/system/cpu/cpu0/cpufreq/schedutil/up_rate_limit_us
+    echo 20000 > /sys/devices/system/cpu/cpu0/cpufreq/schedutil/down_rate_limit_us
+
+    # Optimize SchedUtil for Big cluster
+    echo "schedutil" > /sys/devices/system/cpu/cpu6/cpufreq/scaling_governor
+    echo 500 > /sys/devices/system/cpu/cpu6/cpufreq/schedutil/up_rate_limit_us
+    echo 20000 > /sys/devices/system/cpu/cpu6/cpufreq/schedutil/down_rate_limit_us
+
+    # b/37682684 Enable suspend clock reporting
+    echo 1 > /sys/kernel/debug/clk/debug_suspend
+
+    # set default schedTune value for foreground/top-app
+    echo 1 > /dev/stune/foreground/schedtune.prefer_idle
+    echo 10 >  /dev/stune/top-app/schedtune.boost
+    echo 1 > /dev/stune/top-app/schedtune.prefer_idle
+
+}
+
 # copy GPU frequencies to vendor property
 if [ -f /sys/class/kgsl/kgsl-3d0/gpu_available_frequencies ]; then
   gpu_freq=$(cat /sys/class/kgsl/kgsl-3d0/gpu_available_frequencies) 2>/dev/null
@@ -1237,3 +1313,13 @@ case "$target" in
   esac
   ;;
 esac
+
+case "$target" in
+    "sdm710")
+     sdm710_configuration
+     enable_memory_features
+     configure_zram_parameters
+     configure_read_ahead_kb_values
+     setprop vendor.xperience.post_boot.parsed sdm710
+     ;;
+   esac
