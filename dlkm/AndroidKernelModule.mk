@@ -214,8 +214,8 @@ endif
 # then every kernel module would need to explicitly set KBUILD_OPTIONS,
 # or the variable would have to be cleared in 'include $(CLEAR_VARS)'
 # which would require a change to build/core.
+KBUILD_OPTIONS_GKI :=
 KBUILD_OPTIONS :=
 LOCAL_ADDITIONAL_DEPENDENCIES :=
 endif
-KBUILD_OPTIONS_GKI :=
 endif
