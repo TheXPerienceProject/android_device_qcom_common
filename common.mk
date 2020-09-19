@@ -68,11 +68,11 @@ PRODUCT_PACKAGES += qcril.db
 PRODUCT_PACKAGES += \
     init.xperience.postboot.sh
 
-ifneq ($(TARGET_DEFINES_DALVIK_HEAP), true)
-ifneq ($(TARGET_HAS_LOW_RAM), true)
-$(call inherit-product, frameworks/native/build/phone-xhdpi-1024-dalvik-heap.mk)
-endif
-endif
+#ifneq ($(TARGET_DEFINES_DALVIK_HEAP), true)
+#ifneq ($(TARGET_HAS_LOW_RAM), true)
+#$(call inherit-product, frameworks/native/build/phone-xhdpi-1024-dalvik-heap.mk)
+#endif
+#endif
 
 #$(call inherit-product, frameworks/base/data/fonts/fonts.mk)
 #$(call inherit-product, frameworks/base/data/keyboards/keyboards.mk)
