@@ -615,6 +615,14 @@ LIBQDUTILS := libqdutils
 #LIBQDMETADATA
 LIBQDMETADATA := libqdMetaData
 
+#LIBPOWER
+ifneq ($(TARGET_USES_NON_LEGACY_POWERHAL), true)
+LIBPOWER := power.qcom
+#LIBPOWER -- Add HIDL Packages
+LIBPOWER += android.hardware.power@1.0-impl
+LIBPOWER += android.hardware.power@1.0-service
+endif
+
 #LLVM for RenderScript
 #use qcom LLVM
 $(call inherit-product-if-exists, external/llvm/llvm-select.mk)
@@ -885,6 +893,11 @@ else
 
     DELAUN := Launcher3
 endif
+
+#servicetracker HAL
+PRODUCT_PACKAGES += \
+    vendor.qti.hardware.servicetracker@1.2-impl \
+    vendor.qti.hardware.servicetracker@1.2-service
 
 PRODUCT_PACKAGES += $(ALSA_HARDWARE)
 PRODUCT_PACKAGES += $(ALSA_UCM)
@@ -1205,7 +1218,18 @@ PRODUCT_PACKAGES += libqti_vndfwk_detect
 PRODUCT_PACKAGES += libvndfwk_detect_jni.qti.vendor
 PRODUCT_PACKAGES += libqti_vndfwk_detect.vendor
 
+PRODUCT_PACKAGES += android.hardware.drm@1.3-service.widevine
+PRODUCT_PACKAGES += android.hardware.drm@1.3-service.clearkey
+
 #soong namespace for qssi vs vendor differentiation
 SOONG_CONFIG_NAMESPACES += qssi_vs_vendor
 SOONG_CONFIG_qssi_vs_vendor += qssi_or_vendor
 SOONG_CONFIG_qssi_vs_vendor_qssi_or_vendor := vendor
+
+SOONG_CONFIG_NAMESPACES += aosp_vs_qva
+SOONG_CONFIG_aosp_vs_qva += aosp_or_qva
+ifeq ($(TARGET_FWK_SUPPORTS_FULL_VALUEADDS),true)
+SOONG_CONFIG_aosp_vs_qva_aosp_or_qva := qva
+else
+SOONG_CONFIG_aosp_vs_qva_aosp_or_qva := aosp
+endif
