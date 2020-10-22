@@ -1208,6 +1208,9 @@ PRODUCT_PACKAGES_DEBUG += \
 
 PRODUCT_PACKAGES += liboemaids_system
 PRODUCT_PACKAGES += liboemaids_vendor
+ifneq ($(TARGET_PROVIDES_HEALTH_HAL),true
+PRODUCT_PACKAGES += android.hardware.health@2.0-service
+endif
 
 # framework detect libs
 PRODUCT_PACKAGES += libvndfwk_detect_jni.qti
