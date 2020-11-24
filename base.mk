@@ -1010,11 +1010,11 @@ PRODUCT_PACKAGES += tcmiface
 # PRODUCT_PACKAGES += libhealthd.msm
 
 #intialise PRODUCT_PACKAGES_DEBUG list for debug modules
-PRODUCT_PACKAGES_DEBUG := init.qcom.testscripts.sh
+#PRODUCT_PACKAGES_DEBUG := init.qcom.testscripts.sh
 
 #Add init.qcom.test.rc to PRODUCT_PACKAGES_DEBUG list
-PRODUCT_PACKAGES_DEBUG += init.qcom.test.rc
-PRODUCT_PACKAGES_DEBUG += init.qcom.debug.sh
+#PRODUCT_PACKAGES_DEBUG += init.qcom.test.rc#
+#PRODUCT_PACKAGES_DEBUG += init.qcom.debug.sh
 
 #NANOPB_LIBRARY_NAME := libnanopb-c-2.8.0
 
@@ -1057,7 +1057,7 @@ PRODUCT_COPY_FILES += \
     frameworks/av/media/libstagefright/data/media_codecs_google_c2.xml:$(TARGET_COPY_OUT_VENDOR)/etc/media_codecs_google_c2.xml \
     frameworks/av/media/libstagefright/data/media_codecs_google_c2_audio.xml:$(TARGET_COPY_OUT_VENDOR)/etc/media_codecs_google_c2_audio.xml \
     frameworks/av/media/libstagefright/data/media_codecs_google_c2_video.xml:$(TARGET_COPY_OUT_VENDOR)/etc/media_codecs_google_c2_video.xml \
-    device/qcom/common/media/media_profiles.xml:$(TARGET_COPY_OUT_VENDOR)/etc/media_profiles.xml \
+    device/qcom/common/media/media_profiles.xml:$(TARGET_COPY_OUT_VENDOR)/etc/media_profiles.xml
 
 ifneq ($(TARGET_ENABLE_QC_AV_ENHANCEMENTS),true)
 PRODUCT_COPY_FILES += \
@@ -1065,14 +1065,14 @@ PRODUCT_COPY_FILES += \
     device/qcom/common/media/media_profiles.xml:$(TARGET_COPY_OUT_VENDOR)/etc/media_profiles_V1_0.xml
 endif
 
-ifeq ($(strip $(TARGET_USES_NQ_NFC)),true)
-PRODUCT_COPY_FILES += \
-    frameworks/native/data/etc/com.nxp.mifare.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/com.nxp.mifare.xml \
-    frameworks/native/data/etc/com.android.nfc_extras.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/com.android.nfc_extras.xml \
-    frameworks/native/data/etc/android.hardware.nfc.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.nfc.xml \
-    frameworks/native/data/etc/android.hardware.nfc.hce.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.nfc.hce.xml \
-    frameworks/native/data/etc/android.hardware.nfc.hcef.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.nfc.hcef.xml
-endif
+#ifeq ($(strip $(TARGET_USES_NQ_NFC)),true)
+#PRODUCT_COPY_FILES += \
+#    frameworks/native/data/etc/com.nxp.mifare.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/com.nxp.mifare.xml \
+#    frameworks/native/data/etc/com.android.nfc_extras.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/com.android.nfc_extras.xml \
+#    frameworks/native/data/etc/android.hardware.nfc.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.nfc.xml \
+#    frameworks/native/data/etc/android.hardware.nfc.hce.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.nfc.hce.xml \
+#    frameworks/native/data/etc/android.hardware.nfc.hcef.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.nfc.hcef.xml
+#endif
 
 ifneq ($(TARGET_NOT_SUPPORT_VULKAN),true)
 PRODUCT_COPY_FILES += \
@@ -1115,19 +1115,19 @@ endif
 endif
 
 # Set up flags to determine the kernel version
-ifeq ($(TARGET_KERNEL_VERSION),)
-     TARGET_KERNEL_VERSION := 3.18
-endif
-ifneq ($(KERNEL_OVERRIDE),)
-     TARGET_KERNEL_VERSION := $(KERNEL_OVERRIDE)
-endif
-ifeq ($(wildcard kernel/msm-$(TARGET_KERNEL_VERSION)),)
-     KERNEL_TO_BUILD_ROOT_OFFSET := ../
-     TARGET_KERNEL_SOURCE := kernel
-else
-     KERNEL_TO_BUILD_ROOT_OFFSET := ../../
-     TARGET_KERNEL_SOURCE := kernel/msm-$(TARGET_KERNEL_VERSION)
-endif
+#ifeq ($(TARGET_KERNEL_VERSION),)
+#     TARGET_KERNEL_VERSION := 3.18
+#endif
+#ifneq ($(KERNEL_OVERRIDE),)
+#     TARGET_KERNEL_VERSION := $(KERNEL_OVERRIDE)
+#endif
+#ifeq ($(wildcard kernel/msm-$(TARGET_KERNEL_VERSION)),)
+#     KERNEL_TO_BUILD_ROOT_OFFSET := ../
+#     TARGET_KERNEL_SOURCE := kernel
+#else
+#     KERNEL_TO_BUILD_ROOT_OFFSET := ../../
+#     TARGET_KERNEL_SOURCE := kernel/msm-$(TARGET_KERNEL_VERSION)
+#endif
 
 #Enabling Ring Tones
 #include frameworks/base/data/sounds/OriginalAudio.mk
@@ -1207,7 +1207,7 @@ PRODUCT_PACKAGES_DEBUG += \
 
 PRODUCT_PACKAGES += liboemaids_system
 PRODUCT_PACKAGES += liboemaids_vendor
-ifneq ($(TARGET_PROVIDES_HEALTH_HAL),true
+ifneq ($(TARGET_PROVIDES_HEALTH_HAL),true)
 PRODUCT_PACKAGES += android.hardware.health@2.0-service
 endif
 
