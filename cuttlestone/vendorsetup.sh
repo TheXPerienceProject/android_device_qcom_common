@@ -14,5 +14,5 @@
 # limitations under the License.
 #
 
-export SDCLANG_AE_CONFIG="$(gettop)/device/qcom/common/cuttlestone/sdclang.json"
-export SDCLANG_CONFIG="$(gettop)/device/qcom/common/cuttlestone/sdclang.json"
+#export SDCLANG_AE_CONFIG="$(gettop)/device/qcom/common/cuttlestone/sdclang.json"
+#export SDCLANG_CONFIG="$(gettop)/device/qcom/common/cuttlestone/sdclang.json"
