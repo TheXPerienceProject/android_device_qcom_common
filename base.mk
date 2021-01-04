@@ -325,7 +325,11 @@ INIT += init.qcom.sensors.sh
 INIT += init.qcom.crashdata.sh
 INIT += init.qcom.vendor.rc
 INIT += init.target.vendor.rc
+ifeq ($(strip $(TARGET_BOARD_AUTO)),true)
+ifneq ($(strip $(ENABLE_HYP)),true)
 INIT += init.qti.can.sh
+endif
+endif
 
 #IPROUTE2
 IPROUTE2 := ip
@@ -1109,6 +1113,11 @@ PRODUCT_COPY_FILES += frameworks/native/data/etc/android.hardware.vulkan.version
 else
 PRODUCT_COPY_FILES += frameworks/native/data/etc/android.hardware.vulkan.version-1_1.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.vulkan.version-1_1.xml
 endif
+endif
+
+ifneq ($(strip $(TARGET_BUILD_VARIANT)),user)
+PRODUCT_COPY_FILES += \
+    device/qcom/common/rootdir/etc/init.qcom.testscripts.sh:$(TARGET_COPY_OUT_PRODUCT)/etc/init.qcom.testscripts.sh
 endif
 
 ifneq ($(strip $(TARGET_USES_RRO)),true)
