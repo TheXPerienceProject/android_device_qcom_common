@@ -7,6 +7,7 @@
 # and gets parsed before build/core/Makefile, which has these
 # variables defined. build/core/Makefile will overwrite these
 # variables again.
+ifneq ($(TARGET_DEVICE),davinci)
 ifneq ($(strip $(TARGET_NO_KERNEL)),true)
 
 ifneq ($(strip $(BOARD_KERNEL_BINARIES)),)
@@ -270,3 +271,4 @@ endif
 
 #Print PRODUCT_PACKAGES & PRODUCT_PACKAGES_DEBUG to output log
 $(call dump-products)
+endif # if not equals to davinci
