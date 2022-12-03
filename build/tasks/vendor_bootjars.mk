@@ -1,6 +1,6 @@
 # This makefile is used to include
 # extra product boot jars for SDK
-ifneq ($(TARGET_DEVICE),davinci)
+ifneq ($(filter davinci chime,$(TARGET_DEVICE)),)
 ifneq ($(VENDOR_QTI_PLATFORM),qssi)
 ifneq ($(call is-vendor-board-platform,QCOM),true)
 
