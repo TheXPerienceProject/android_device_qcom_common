@@ -7,7 +7,7 @@
 # and gets parsed before build/core/Makefile, which has these
 # variables defined. build/core/Makefile will overwrite these
 # variables again.
-ifneq ($(TARGET_DEVICE),davinci)
+ifneq ($(filter davinci chime,$(TARGET_DEVICE)),)
 ifneq ($(strip $(TARGET_NO_KERNEL)),true)
 
 ifneq ($(strip $(BOARD_KERNEL_BINARIES)),)
